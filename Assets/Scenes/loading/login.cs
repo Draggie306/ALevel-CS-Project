@@ -7,11 +7,19 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using Newtonsoft.Json.Linq; // talk about nuget for unity in writeup
+using Newtonsoft.Json;
 using TMPro;
+using UnityEngine.SceneManagement;
+using System.Security.Cryptography;
+using System.IO;
+
+
 public class initialUsernameJsonDict {
     public string email { get; set; }
     public string password { get; set; }
+    #nullable enable
     public string? scope { get; set; } = null;
+    #nullable disable
     // As attribute is optional, we can nullify it to improve static flow analysis
     // https://learn.microsoft.com/en-us/dotnet/csharp/nullable-references
 }
@@ -34,6 +42,47 @@ public class login : MonoBehaviour
         Debug.Log($"[ChangeErrorMessage] Displayed {message}");
         // TODO: make this a coroutine so it disappears after a few seconds
         // wait 5 seconds:
+    }
+
+    public void WriteEncryptedAuthToken(dynamic initToken)
+    {
+        try
+        {
+            Debug.Log($"[WriteEncryptedAuthToken] Attempting to write encrypted auth token to file");
+            string path = Application.persistentDataPath + "/credentials.bin";
+            Debug.Log($"[WriteEncryptedAuthToken] Path: {path}");
+            string encryptionKey = "MIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQBKDqhnbAbXU+ZvYQ+HY/Sk5roKCImfXKG0b1jtcgVNpJlfKc9pKIQ0eOJoSrgYbA6CvvG38NxM/WIcecHp2K4aD9OOJZC+c2FXQGN/eJKA67/w1E8QdpSK7u2hHiHA/bLUvU3QxCIx9EmghGnO94/cubtSYROjTZ1ZNlo3RvZ0UFZYEiixz3kx89DqbtOETxWfzWVZ5naBOg5Vhp7zlnVFRLbOqAs8ZYnHdFIkgNp4ArzyLmshgVyDzXvJaTV9gFi1KawLvpEbQEELNeM9ZLAGqA2wpxDYdjKQTsfgjnqp+DjiY3+kxiDWUK57ZCfNV6JEy9wKVQV4SJ2iWiRH6L6VAgMBAAE=";
+            byte[] token = Encoding.UTF8.GetBytes(initToken);
+
+            using (var rsa = new RSACryptoServiceProvider(2048))
+            // abridged from https://stackoverflow.com/questions/17128038/c-sharp-rsa-encryption-decryption-with-transmission
+            {
+                try
+                {
+                    rsa.FromXmlString(encryptionKey);
+                    var encryptedToken = rsa.Encrypt(token, RSAEncryptionPadding.Pkcs1);
+
+                    // Serialize to JSON
+                    string json = JsonConvert.SerializeObject(new { token = Convert.ToBase64String(encryptedToken) });
+
+                    // Write to file
+                    using (StreamWriter writer = new StreamWriter(path, true))
+                    {
+                        writer.WriteLine(json);
+                    }
+                }
+                finally
+                {
+                    rsa.PersistKeyInCsp = false;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[WriteEncryptedAuthToken] Exception: {e}");
+            ChangeErrorMessage($"[Non-fatal] Unable to write encrypted auth token to file. Please contact the developer: {e}");
+        }
+
     }
 
     public void updateInformationMessage(string message)
@@ -70,7 +119,7 @@ public class login : MonoBehaviour
                 ChangeErrorMessage("Please enter an email and password");
                 return;
             } else {
-                Debug.Log("Email and password seem to habe been entered");
+                Debug.Log("Email and password seem to have been entered");
             }
 
             var loginAccount = new initialUsernameJsonDict
@@ -81,6 +130,7 @@ public class login : MonoBehaviour
             };
 
             string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(loginAccount);
+            updateInformationMessage("Logging in to Draggie Games account...");
 
             using (HttpClient client = new HttpClient())
             {
@@ -96,6 +146,7 @@ public class login : MonoBehaviour
                         // these are handled by the server
                         dynamic parsedJsonResponse = JObject.Parse(responseString);
                         ChangeErrorMessage($"An error has occurred.\n\nHTTP status code: [error {responseStatusCode}]\nDetailed message: {parsedJsonResponse.message}");
+                        updateInformationMessage($"{parsedJsonResponse.message}. Please try again.");
                     }
                     catch (Exception e)
                     {
@@ -108,10 +159,59 @@ public class login : MonoBehaviour
                 Debug.Log($"[OnLoginButtonClicked] it seems like it worked! {responseString}");
                 
                 dynamic parsedResponse = JObject.Parse(responseString);
-                updateInformationMessage($"Successfully logged in to Draggie Games account {parsedResponse.account}!");
-                var accessToken = parsedResponse.token; // This is very important, as it acts as a session cookie. If someone gets this, they can log in as you.
+                updateInformationMessage($"Checking user entitlements...");
+                var accessToken = parsedResponse.auth_token; // This is very important, as it acts as a session cookie. If someone gets this, they can log in as you.
                 Debug.Log($"[OnLoginButtonClicked] Access token: {accessToken}");
+                // PlayerPrefs.SetString("accessToken", accessToken);
 
+                // Check for user access to the game (alpha test entitlement check)
+
+                var secureTokenRequest = new SecureTokenRequest
+                {
+                    token = accessToken,
+                    email = email
+                };
+
+                async void checkEntitlements() 
+                {
+                    string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(secureTokenRequest);
+                    using (HttpClient client = new HttpClient())
+                    {
+                        var response = await client.GetAsync($"{serverBaseDirectoryUrl}/api/v1/saturnian/game/gameData/licenses/validation?token={accessToken}");
+                        var responseString = await response.Content.ReadAsStringAsync();
+                        var responseStatusCode = response.StatusCode;
+                        if (responseStatusCode != HttpStatusCode.OK) {
+                            try {
+                                dynamic parsedJsonResponse = JObject.Parse(responseString);
+                                ChangeErrorMessage($"An error has occurred.\n\nHTTP status code: [error {responseStatusCode}]\nDetailed message: {parsedJsonResponse.message}");
+                                updateInformationMessage($"{parsedJsonResponse.message}. Please try again.");
+                            } catch (Exception e) {
+                                ChangeErrorMessage($"The server had a difficulty handling your request! Sorry about that.\n\nRaw error: {e}");
+                                updateInformationMessage($"Technical error. Please try again.");
+                            }
+                            return;
+                        }
+                        // else it is okay
+                        updateInformationMessage($"Saving credentials...");
+
+                        dynamic parsedResponse = JObject.Parse(responseString);
+                        var entitlements = parsedResponse.type;
+
+                        if (entitlements == "alpha") {
+                            // allow in
+                            WriteEncryptedAuthToken(accessToken);
+                            updateInformationMessage($"Loading game...");
+                            //StartCoroutine(DelayScene(6));
+                            SceneManager.LoadScene("MainScene", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
+                        } else {
+                            ChangeErrorMessage("You do not have access to the alpha test. Please contact the developer for more information.");
+                            updateInformationMessage("You do not have access to the alpha test. Please contact the developer for more information.");
+                            Application.Quit();
+                        }
+                    }
+                }
+
+                checkEntitlements();
             }
         } catch (Exception e) {
             Debug.LogError($"An error has occurred: {e}");
@@ -122,11 +222,14 @@ public class login : MonoBehaviour
         }
     }
 
-
+    IEnumerator DelayScene(int seconds = 2)
+    {
+        yield return new WaitForSeconds(seconds);
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("Started");
+        Debug.Log("Initialised login.cs in loading scene");
     }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Text.Json; // backup for newtonsoft
 using System.Text;
 using Newtonsoft.Json.Linq;
+using System.IO; // for file input/output
 
 public class initialUsernameJsonDict {
     public string email { get; set; }

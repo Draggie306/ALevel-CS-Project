@@ -15,10 +15,11 @@ using System.IO;
 
 
 public class initialUsernameJsonDict {
+    // TODO: naming rule violation fix
     public string email { get; set; }
     public string password { get; set; }
     #nullable enable
-    public string? scope { get; set; } = null;
+    public string? scope { get; set; } = null; 
     #nullable disable
     // As attribute is optional, we can nullify it to improve static flow analysis
     // https://learn.microsoft.com/en-us/dotnet/csharp/nullable-references
@@ -33,7 +34,6 @@ public class login : MonoBehaviour
     public InputField emailInput;
     public InputField passwordInput;
     public string serverBaseDirectoryUrl = "https://client.draggie.games";
-
 
     public void ChangeErrorMessage(string message)
     {
@@ -85,14 +85,14 @@ public class login : MonoBehaviour
 
     }
 
-    public void updateInformationMessage(string message)
+    public void updateInformationMessage(string message) // short function to update the information message
     {
         var informationText = GameObject.Find("StatusText");
         informationText.GetComponent<TextMeshProUGUI>().text = message;
         Debug.Log($"[updateInformationMessage] Displayed {message}");
     }
 
-    public async void OnLoginButtonClocked()
+    public async void OnLoginButtonClocked() // called when the login button is clicked
     {
         //Text statusText = GameObject.Find("StatusText").GetComponent<Text>();
 
@@ -108,6 +108,7 @@ public class login : MonoBehaviour
             Debug.Log($"Email: {email}, Password: {password}");
 
             // Sanitise email and password, remove u200b (zero width space) and trim
+            // for some reason, the input field adds a zero width space to the end of the string
             email = email.Replace("\u200b", "");
             password = password.Replace("\u200b", "");
             email = email.Trim();
@@ -126,10 +127,10 @@ public class login : MonoBehaviour
             {
                 email = email,
                 password = password,
-                scope = "unity/draggiegames-compsciproject"
+                scope = "unity/draggiegames-compsciproject" // this can also be called the user agent
             };
 
-            string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(loginAccount);
+            string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(loginAccount); // JsonConvert.SerializeObject converts the object to a JSON string, which is what the server expects
             updateInformationMessage("Logging in to Draggie Games account...");
 
             using (HttpClient client = new HttpClient())
@@ -210,7 +211,6 @@ public class login : MonoBehaviour
                         }
                     }
                 }
-
                 checkEntitlements();
             }
         } catch (Exception e) {

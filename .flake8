@@ -1,0 +1,5 @@
+[flake8]
+per-file-ignores =
+    # line too long
+    D:\Unity\CS-Project\python\autoupdate\AutoUpdateClient_Trimmed.py: E501,
+    D:\Unity\CS-Project\python\autoupdate\tools\DraggieTools_Trimmed.py: E501,

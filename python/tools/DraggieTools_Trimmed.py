@@ -440,7 +440,7 @@ def download_update(current_build_version):
         if not path.exists(f'{DraggieTools_AppData_Directory}\\UpdatedBuilds'):
             mkdir(f'{DraggieTools_AppData_Directory}\\UpdatedBuilds')
 
-        tqdm_download("https://github.com/Draggie306/ALevel-CS-Project/blob/main/python/tools/dist/DraggieTools_Trimmed", f"{DraggieTools_AppData_Directory}\\UpdatedBuilds\\DraggieTools-{current_build_version}.exe")
+        tqdm_download("https://github.com/Draggie306/ALevel-CS-Project/blob/main/python/tools/dist/DraggieTools_Trimmed.exe?raw=true", f"{DraggieTools_AppData_Directory}\\UpdatedBuilds\\DraggieTools-{current_build_version}.exe")
 
         with open(f"{Draggie_AppData_Directory}\\OldExecutableDir.txt", "w") as file:
             file.write(f"{sys.executable}")
@@ -945,7 +945,7 @@ def draggieclient():
     lily_initial_choice = input("\nWhat do you want to do?\n[0] Go back\n[1] Install\n[2] Uninstall\n[3] View Logs\n[4] Manage Settings\n\n>>> ")
 
     try:
-        target_path = os.path.expanduser("~\\AppData\\Local\\Draggie\\Trimmed_Client\\client.exe")
+        target_path = os.path.expanduser("~\\AppData\\Local\\Draggie\\Trimmed_Client\\lily.exe")
         lily_ensure_appdata_dir = (f"{environ_dir}\\AppData\\Local\\Draggie\\Trimmed_Client")
         lily_ensure_appdata_dir_via_expanded = (f"{os.path.expanduser('~')}\\AppData\\Local\\Draggie\\Trimmed_Client")
     except Exception as e:

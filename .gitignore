@@ -70,3 +70,10 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Custom for this project
+/Assets/TerrainSampleAssets/*
+/Assets/PBR Ground Materials #2 [Dirt, Grass & Rocky]/*
+/Assets/Conifers [BOTD]*
+
+*.psd

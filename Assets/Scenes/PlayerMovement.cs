@@ -54,7 +54,7 @@ public class PlayerMovement : MonoBehaviour
         grounded_caps_string = grounded_caps_string.ToUpper();
 
         // log the horizontal and vertical input
-        Debug.Log("Grounded: " + grounded_caps_string + ". Rigidbody X velocity: " + rb.velocity.x + ". Rigidbody Y velocity: " + rb.velocity.y + ". Rigidbody Z velocity: " + rb.velocity.z);
+        // Debug.Log("Grounded: " + grounded_caps_string + ". Rigidbody X velocity: " + rb.velocity.x + ". Rigidbody Y velocity: " + rb.velocity.y + ". Rigidbody Z velocity: " + rb.velocity.z);
 
         // if movement hasn't changed since last frame, set grounded to False
 
@@ -70,12 +70,12 @@ public class PlayerMovement : MonoBehaviour
         if (grounded)
         {
             rb.drag = groundDrag;
-            Debug.Log("Grounded");
+            // Debug.Log("Grounded");
         }
         else
         {
             rb.drag = 0.1f;
-            Debug.Log("Not Grounded, set drag to 0.1f");
+            // Debug.Log("Not Grounded, set drag to 0.1f");
         }
     }
 

@@ -68,6 +68,7 @@ public class login : MonoBehaviour
                     using (StreamWriter writer = new StreamWriter(path, true))
                     {
                         writer.WriteLine(json);
+                        Debug.Log($"[WriteEncryptedAuthToken] Wrote encrypted auth token to file successfully");
                     }
                 }
                 finally
@@ -221,15 +222,12 @@ public class login : MonoBehaviour
                             // allow in
                             WriteEncryptedAuthToken(accessToken);
                             updateInformationMessage($"Loading game...");
-                            //StartCoroutine(DelayScene(6));
+                            PlayerPrefs.SetString("Email", email);
+                            PlayerPrefs.SetString("Username", parsedResponse.account);
+                            // PlayerPrefs.SetString("accessToken", accessToken);
+                            Debug.Log($"[SaveCredentials] Saved credentials to PlayerPrefs");
 
-                            // https://forum.unity.com/threads/calling-function-from-other-scripts-c.57072/
-                            // myObject.GetComponent<MyScript>().MyFunction();
-
-                            var LoadingObjectInsideLoadingScene = GameObject.Find("LoadingScene");
-                            LoadingObjectInsideLoadingScene.GetComponent<LoadingScreen>().LoadScene(1);
-
-                            // SceneManager.LoadScene("MainScene", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
+                            SceneManager.LoadScene("MainScene", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
                             
                             var LoggedInAS = GameObject.Find("LoggedInAs");
                             LoggedInAS.GetComponent<TextMeshProUGUI>().text = $"Logged in as: {parsedResponse.account} ({parsedResponse.email})";
@@ -261,7 +259,7 @@ public class login : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("Initialised login.cs in loading scene");
+        Debug.Log($"Initialised login.cs from GameObject {gameObject.name}");
         // Password input field from https://forum.unity.com/threads/changing-inputfield-contenttype-via-script-does-not-update-text.935525/
         var passwordInput = GameObject.Find("PassText");
         Debug.Log($"[Start] passwordInput: {passwordInput}");

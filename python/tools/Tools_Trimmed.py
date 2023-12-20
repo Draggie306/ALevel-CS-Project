@@ -565,7 +565,7 @@ def projectsaturnian():
 
     def decrypt_token(encrypted_token):
         log("[decrypt_token] decrypting token")
-        token = encrypted_token
+        token = bytes(encrypted_token, encoding="utf-8")
         return fernet_key.decrypt(token)
 
     def read_tokenfile_contents():
@@ -591,7 +591,7 @@ def projectsaturnian():
             log(f"[write_token] Created directory: {saturnian_appdir}")
         with open(f"{saturnian_appdir}\\token.bin", "wb") as f:
             f.write(encrypted_token.encode())
-            log(f"[write_token] Wrote encrypted token to file: {encrypted_token}")
+            log(f"[write_token] Wrote encrypted token to file: {saturnian_appdir}\\token.bin")
 
     def read_datafile_attribute(attribute):
         """
@@ -1139,7 +1139,6 @@ def main():
         change_language()
         log(f"{phrases[language]['run_from']}", 2)
     log(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: main() subroutine executed", 1, False)
-    log(f"{green_colour}{random.choice(funny_messages)}")
     log(phrases[language]['menu_prompt'])
     save_json()
 

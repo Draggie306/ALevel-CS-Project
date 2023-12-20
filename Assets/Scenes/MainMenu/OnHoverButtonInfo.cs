@@ -1,0 +1,22 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using TMPro;
+
+public class OnHoverButtonInfo : MonoBehaviour
+{
+    public string TextToDisplay = "Hover over a button to see its description"; // default text
+    public TextMeshProUGUI InformationText; // the text object to change
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        Debug.Log("Initialised OnHoverButtonInfo");
+    }
+
+    // method to change the text of the InfoContent game object
+    public void ChangeInfoContent(string newContent)
+    {
+        InformationText.text = newContent; // change the text
+    }
+}

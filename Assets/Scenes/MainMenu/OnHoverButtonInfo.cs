@@ -5,7 +5,7 @@ using TMPro;
 
 public class OnHoverButtonInfo : MonoBehaviour
 {
-    public string TextToDisplay = "Hover over a button to see its description"; // default text
+    public string TextToDisplay = ""; // default text // Hover over a button to see its description
     public TextMeshProUGUI InformationText; // the text object to change
 
     // Start is called before the first frame update

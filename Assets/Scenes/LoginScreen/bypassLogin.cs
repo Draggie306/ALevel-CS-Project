@@ -31,11 +31,13 @@ public class bypassLogin : MonoBehaviour
         try {
             var LoadingObjectInsideLoadingScene = GameObject.Find("LoadingScene");
             LoadingObjectInsideLoadingScene.GetComponent<LoadingScreen>().LoadScene(1);
-            SceneManager.LoadScene("MainScene", LoadSceneMode.Single);
+            // SceneManager.LoadScene("MainScene", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
+            SceneManager.LoadScene("MainMenu", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
             OnMainSceneLoadSuccessChangeText();
         } catch (Exception e) {
             Debug.LogError($"[OnBypassButtonClick] Cool new loading screen not found. Using old one. Error: {e}");
-            SceneManager.LoadScene("MainScene", LoadSceneMode.Single);
+            // SceneManager.LoadScene("MainScene", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
+            SceneManager.LoadScene("MainMenu", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
             OnMainSceneLoadSuccessChangeText();
         }
     }

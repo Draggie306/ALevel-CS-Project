@@ -1233,7 +1233,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -4.0999756, y: -3.564972}
+  m_AnchoredPosition: {x: -4.0999756, y: -3.5649414}
   m_SizeDelta: {x: 288.89294, y: 43.765015}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &400758689
@@ -1433,7 +1433,7 @@ Transform:
   m_GameObject: {fileID: 444400782}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 963, y: 533, z: 13}
+  m_LocalPosition: {x: 556, y: 314, z: 13}
   m_LocalScale: {x: 192.26163, y: 0.19226164, z: 109.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3369,7 +3369,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Build date: \t\t\t20/12/2023 20:28\nVersion: \t\t\t0.0.7 (q)"
+  m_text: "Build date: \t\t\t21/12/2023 17:27\nVersion: \t\t\t0.0.8 (y)"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

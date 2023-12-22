@@ -22,7 +22,7 @@ public class SecureTokenRequest1 {
     public string email { get; set; }
 }
 
-class Program
+class MainProgram
 {
     public static void print(string message) { // Python is print() so this name makes it nicer to translate
         // DateTime from https://www.bytehide.com/blog/datetime-now-vs-datetime-utcnow-csharp

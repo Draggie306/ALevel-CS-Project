@@ -227,7 +227,8 @@ public class login : MonoBehaviour
                             // PlayerPrefs.SetString("accessToken", accessToken);
                             Debug.Log($"[SaveCredentials] Saved credentials to PlayerPrefs");
 
-                            SceneManager.LoadScene("MainScene", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
+                            // SceneManager.LoadScene("MainScene", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
+                            SceneManager.LoadScene("MainMenu", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
                             
                             var LoggedInAS = GameObject.Find("LoggedInAs");
                             LoggedInAS.GetComponent<TextMeshProUGUI>().text = $"Logged in as: {parsedResponse.account} ({parsedResponse.email})";

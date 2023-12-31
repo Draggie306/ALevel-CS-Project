@@ -17,6 +17,12 @@ public class OnHoverButtonInfo : MonoBehaviour
     // method to change the text of the InfoContent game object
     public void ChangeInfoContent(string newContent)
     {
+        // check if information text is null
+        if (InformationText == null)
+        {
+            Debug.Log("InformationText is null, cannot change text");
+            return;
+        }
         InformationText.text = newContent; // change the text
     }
 }

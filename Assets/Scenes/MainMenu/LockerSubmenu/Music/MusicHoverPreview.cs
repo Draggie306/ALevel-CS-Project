@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+// Scene transition: https://www.youtube.com/watch?v=HBEStd96UzI
+// Keep audio playing between scenes: https://www.youtube.com/watch?v=xswEpNpucZQ
 
 
 public class MusicHoverPreview : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
@@ -44,7 +46,10 @@ public class MusicHoverPreview : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        hoverInfo.ChangeInfoContent(hoverText);
+        if (hoverInfo != null)
+        {
+            hoverInfo.ChangeInfoContent(hoverText);
+        }
         Debug.Log($"Now hovering over {gameObject.name}");
         if (audioPlaying) { StopAllAudio(); }
         if (audioSource != null && hoverSound != null)
@@ -55,15 +60,23 @@ public class MusicHoverPreview : MonoBehaviour, IPointerEnterHandler, IPointerEx
             audioFadeInCoroutine = StartCoroutine(AudioFadeIn.FadeIn(audioSource, 0.7f));
             Debug.Log($"Playing sound {hoverSound.name}");
             audioPlaying = true;
+        } else
+        {
+            Debug.LogWarning($"AudioSource or hoverSound was null on {gameObject.name}");
         }
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        hoverInfo.ChangeInfoContent(hoverInfo.TextToDisplay);
+        if (hoverInfo != null)
+        {
+            hoverInfo.ChangeInfoContent(hoverInfo.TextToDisplay);
+        }
         Debug.Log($"No longer hovering over {gameObject.name}");
         if (audioSource != null && hoverSound != null)
         {
+            // TODO: if the audio button in unity is "selected", then don't stop the audio
+            
             if (audioFadeInCoroutine != null) { StopCoroutine(audioFadeInCoroutine); Debug.Log($"determined fade in coroutine was not null, stopping playing sound {hoverSound.name}"); }
             audioFadeOutCoroutine = StartCoroutine(AudioFadeOut.FadeOut(audioSource, 0.3f));
             Debug.Log("Stopping sound");

@@ -110,13 +110,18 @@ public class login : MonoBehaviour
 
         try {
             Debug.Log("Login button clicked");
-    
+
+            GameObject inputField = GameObject.Find("TMP_Password");  // This should be the input parent field and not the child text field.
             string email = GameObject.Find("emailText").GetComponent<TextMeshProUGUI>().text;
-            string password = GameObject.Find("PassText").GetComponent<TextMeshProUGUI>().text;
+
+            string password = inputField.GetComponent<TMP_InputField>().text; // https://discussions.unity.com/t/how-to-get-text-from-textmeshpro-input-field/215584
+            // string password = GameObject.Find("PassText").GetComponent<TMP_InputField>().text; 
+            // 0.0.9: changed from InputField to TMP_InputField as the password field was returning "***" instead of the password
+            // the TextMeshProUGUI component is just the visual representation of the text. When the TMP_InputField is set to the "password" mode, the TextMeshProUGUI component will only show ***s!
+            // Taken from: https://forum.unity.com/threads/change-inputfield-input-from-standard-to-password-text-via-script.291897/
 
             GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().text = "Logging in...";
             
-
             Debug.Log($"Email: {email}, Password: {password}");
 
             // Sanitise email and password, remove u200b (zero width space) and trim
@@ -180,6 +185,7 @@ public class login : MonoBehaviour
                 dynamic parsedResponse = JObject.Parse(responseString);
                 updateInformationMessage($"Checking user entitlements...");
                 var accessToken = parsedResponse.auth_token; // This is very important, as it acts as a session cookie. If someone gets this, they can log in as you.
+                var username = $"{parsedResponse.account}";
                 Debug.Log($"[OnLoginButtonClicked] Access token: {accessToken}");
                 // PlayerPrefs.SetString("accessToken", accessToken);
 
@@ -216,22 +222,25 @@ public class login : MonoBehaviour
                         updateInformationMessage($"Saving credentials...");
 
                         dynamic parsedResponse = JObject.Parse(responseString);
+                        Debug.Log($"[DEBUG/JSONDUMP] {parsedResponse}");
                         var entitlements = parsedResponse.type;
 
                         if (entitlements == "alpha") {
                             // allow in
                             WriteEncryptedAuthToken(accessToken);
                             updateInformationMessage($"Loading game...");
-                            PlayerPrefs.SetString("Email", email);
-                            PlayerPrefs.SetString("Username", parsedResponse.account);
-                            // PlayerPrefs.SetString("accessToken", accessToken);
-                            Debug.Log($"[SaveCredentials] Saved credentials to PlayerPrefs");
+                            PlayerPrefs.SetString("DraggieGamesEmail", email);
+                            Debug.Log($"[SavePlayerPrefs] Saved email to PlayerPrefs ({email})");
+                            PlayerPrefs.SetString("SaturnianUsername", $"{username}");
+                            Debug.Log($"[SavePlayerPrefs] Saved username to PlayerPrefs ({username})");
+                            PlayerPrefs.SetString("accessToken", $"{accessToken}");
+                            Debug.Log($"[SavePlayerPrefs] Saved accessToken to PlayerPrefs ({accessToken})");
 
                             // SceneManager.LoadScene("MainScene", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
                             SceneManager.LoadScene("MainMenu", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
                             
                             var LoggedInAS = GameObject.Find("LoggedInAs");
-                            LoggedInAS.GetComponent<TextMeshProUGUI>().text = $"Logged in as: {parsedResponse.account} ({parsedResponse.email})";
+                            LoggedInAS.GetComponent<TextMeshProUGUI>().text = $"Logged in as: {username} ({email})";
                         } else {
                             ChangeErrorMessage("You do not have access to the alpha test. Please contact the developer for more information.");
                             updateInformationMessage("You do not have access to the alpha test. Please contact the developer for more information.");

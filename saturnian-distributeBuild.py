@@ -1,7 +1,7 @@
 import subprocess, os
 
 script_directory = r"D:\rclone-v1.62.2-windows-amd64\rclone.exe"
-og_copy_to = "r2demo:saturnian-content/"
+og_copy_to = "r2demo:draggiegames-library/"
 
 
 # auto detect build number
@@ -47,14 +47,14 @@ print(f"Zipping the build directory to {zipfile_name}...")
 os.chdir(default_build_dir)
 subprocess.run(["powershell.exe", f"Compress-Archive -Path * -DestinationPath '{zipfile_name}' -Force"])
 
-copy_to = f"{og_copy_to}builds/{build_number}"
+copy_to = f"{og_copy_to}/saturnian/builds/{build_number}"  # TODO: change build number to uuid to prevent reverse engineering and copying of builds
 
 print(f"\nUploading {zipfile_name} to {copy_to} on Cloudflare R2...")
 ps_script = r"D:\rclone-v1.62.2-windows-amd64\rclone.exe copy " + "'" + zipfile_name + "'" + " " + copy_to
 
 # if filesize is bigger than 500 give warning
 if os.path.getsize(zipfile_name) > 512000000:
-    print("WARNING: The file size is larger than 512MB, cloudflare will not cache this file. Consider splitting the file into shards.")
+    print("WARNING: The file size is larger than 512MB, the Cloudflare CDN will not cache this file, and it will be served from the raw R2 bucket. Consider splitting the build into shards.")
 
 
 print(f"Executing:\n\n{ps_script}\n\n")
@@ -96,5 +96,5 @@ completed_process = subprocess.run([
 if completed_process.returncode == 0:
     print(f"Updated build number file to {build_number} successfully.")
 
-print("\nLast step! Go to https://replit.com/@Draggie/clientdraggiegames-server-Cloudflare-Working and change the secrets and URL to match the new build number.")
-print(f"\nBuild number: {build_number}\nURL: https://saturnian-content-download-euwest001-prod.draggie.games/builds/{build_number}/build.zip")
+print("\nLast step! Go to the raspi and set the env variable to the build number. Then run sudo systemctl restart draggiegames to restart the server.")
+print(f"\nBuild number: {build_number}\nURL: https://draggiegames.library.content.euwest0002.prod.draggie.games/saturnian/builds/{build_number}/build.zip")

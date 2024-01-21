@@ -1,5 +1,7 @@
 # My A level Computer Science Project
 
+[![time spent](https://wakatime.com/badge/user/018c55e4-8c24-4c7a-b81f-a20c9b916c07/project/018c5fee-7965-4ba6-8490-e32f91a245cc.svg)](https://wakatime.com/badge/user/018c55e4-8c24-4c7a-b81f-a20c9b916c07/project/018c5fee-7965-4ba6-8490-e32f91a245cc)
+
 Welcome to my A level Computer Science project! This project contains a lot of different things, including a Unity project, Python scripts, and more.
 
 ## 🔗 Linked repositories
@@ -9,7 +11,7 @@ The server is available on another repository, [draggie306/DraggieGamesServer](h
 ## 📁 Project Structure
 
 - `Assets/` - Contains most assets for the project, including materials, images, and packages.
-    - `Assets/Scenes/` - Contains the scenes for the project and handmade C# scripts.
+    - `Assets/SceneScripts/` - Contains the scenes for the project and handmade C# scripts.
 - `Packages/` - Unity json files for package list
 - `python/` - Contains Python scripts including autoupdate and tools for the project.
 - `saturnian-distributeBuild.py` - Python script to distribute the build using Cloudflare R2 object storage.

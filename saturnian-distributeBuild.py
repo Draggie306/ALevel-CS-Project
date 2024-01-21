@@ -47,7 +47,7 @@ print(f"Zipping the build directory to {zipfile_name}...")
 os.chdir(default_build_dir)
 subprocess.run(["powershell.exe", f"Compress-Archive -Path * -DestinationPath '{zipfile_name}' -Force"])
 
-copy_to = f"{og_copy_to}/saturnian/builds/{build_number}"  # TODO: change build number to uuid to prevent reverse engineering and copying of builds
+copy_to = f"{og_copy_to}saturnian/builds/{build_number}"  # TODO: change build number to uuid to prevent reverse engineering and copying of builds
 
 print(f"\nUploading {zipfile_name} to {copy_to} on Cloudflare R2...")
 ps_script = r"D:\rclone-v1.62.2-windows-amd64\rclone.exe copy " + "'" + zipfile_name + "'" + " " + copy_to

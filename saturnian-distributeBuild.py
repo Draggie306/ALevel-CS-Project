@@ -21,15 +21,19 @@ for x in os.listdir(folder_with_builds):
 print(f"\n\nDetected largest build number: {auto_build_number}")
 
 
-build_number = input("If this is correct, press enter. Otherwise, enter the correct build number:\n\n>>> ")
-if build_number == "":
-    build_number = auto_build_number
+# build_number = input("If this is correct, press enter. Otherwise, enter the correct build number:\n\n>>> ")
+# if build_number == "":
+build_number = auto_build_number
+print(f"\n[auto] Set build number: {build_number}")
 
 build_folder_dir = os.path.join(folder_with_builds, str(build_number))
 
-default_build_dir = input(f"\n\nThis will zip the contents of \"{folder_with_builds}\\{build_number}\".\nIf this is correct, press enter. Otherwise, enter the correct path:\n\n>>> ")
-if default_build_dir == "":
-    default_build_dir = build_folder_dir
+# default_build_dir = input(f"\n\nThis will zip the contents of \"{folder_with_builds}\\{build_number}\".\nIf this is correct, press enter. Otherwise, enter the correct path:\n\n>>> ")
+# if default_build_dir == "":
+#     default_build_dir = build_folder_dir
+default_build_dir = build_folder_dir
+
+print(f"\n[auto] Set default bild dir to: {default_build_dir}")
 
 # Package the directory contents into a zip file
 # Output to D:\OneDrive - Notre Dame High School\Unity Projects

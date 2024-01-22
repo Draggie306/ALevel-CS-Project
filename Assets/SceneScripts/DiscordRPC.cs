@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using Discord;
 
 /*
     Grab that Client ID from earlier
@@ -14,33 +15,49 @@ using UnityEngine;
     Therefore, always keep Discord running during tests, or use Discord.CreateFlags.NoRequireDiscord
 */
 
-
 public class DiscordRPC : MonoBehaviour
 {
-    // Start is called before the first frame update
+    public long clientId = 899342308372254840;
+    public string state = "Playing";
+    public string details = "techDemo";
+    public string largeImage = "https://cdn.jsdelivr.net/gh/Draggie306/iBaguette@main/media/cats/CatswirlOptimised";
+    public string largeText = "Unity";
+
+    private Discord.Discord discord;
+    private ActivityManager activityManager;
+
     void Start()
     {
-        var discord = new Discord.Discord(1140698648179658824, (System.UInt64)Discord.CreateFlags.Default);
-        var activityManager = discord.GetActivityManager();
-        var activity = new Discord.Activity
-        {
-            State = "Playing",
-            Details = "techDemo",
-            Timestamps =
-            {
-                Start = DateTimeOffset.Now.ToUnixTimeSeconds()
-            },
-            Assets =
-            {
-                LargeImage = "https://cdn.jsdelivr.net/gh/Draggie306/iBaguette@main/media/cats/CatswirlOptimised.webp",
-                LargeText = "Unity"
-            }
-        };
+        discord = new Discord.Discord(clientId, (UInt64)CreateFlags.Default);
+        activityManager = discord.GetActivityManager();
+        UpdateActivity();
     }
 
-    // Update is called once per frame
+    public void UpdateActivity()
+    {
+        var activity = new Activity
+        {
+            State = state,
+            Details = details,
+            Timestamps = { Start = DateTimeOffset.Now.ToUnixTimeSeconds() },
+            Assets = { LargeImage = largeImage, LargeText = largeText }
+        };
+
+        activityManager.UpdateActivity(activity, (res) => 
+        {
+            if (res == Result.Ok)
+            {
+                Debug.Log("Successfully updated activity.");
+            }
+            else
+            {
+                Debug.LogError("Failed to update activity.");
+            }
+        });
+    }
+
     void Update()
     {
-        
+        discord.RunCallbacks();
     }
 }

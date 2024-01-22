@@ -45,10 +45,10 @@ public class MyBehaviour : MonoBehaviour {
             Debug.Log("[RemoteTextureDL] LoadingCircle is enabled. Disabling");
             gameObject.GetComponent<LoadingCircle>().enabled = false;
             gameObject.GetComponent<UnityEngine.UI.Image>().type = UnityEngine.UI.Image.Type.Simple;
-            // rotations
+            // rotations 
             Debug.Log($"[RemoteTextureDL] Rotating {gameObject.name} to default rotation");
             // we dont use transform.rotate 0,0,0 as that movex relatively, 0 wouldnt do anything. quaternion euler is absolute (source: https://docs.unity3d.com/Manual/QuaternionAndEulerRotationsInUnity.html)
-            gameObject.GetComponent<UnityEngine.UI.Image>().transform.rotation = Quaternion.Euler(0, 0, 0);
+            gameObject.GetComponent<UnityEngine.UI.Image>().transform.rotation = Quaternion.Euler(0, 0, 0); 
         }
 
 

@@ -6,7 +6,7 @@ using System;
 using System.Net; 
 using System.Net.Http;
 using System.Text;
-using Newtonsoft.Json.Linq; // talk about nuget for unity in writeup
+using Newtonsoft.Json.Linq; // writeup: talk about nuget for unity in writeup
 using Newtonsoft.Json;
 using TMPro;
 using UnityEngine.SceneManagement;
@@ -35,6 +35,10 @@ public class SecureTokenRequest {
 
 public class login : MonoBehaviour
 {
+	// writeup: talk about this - use SerialiseField from what Harry said in class?
+	
+	// "... to account for this, a good rule of thumb is to only expose properties and methods, not fields."
+	// see https://forum.unity.com/threads/reason-s-to-serializefield-a-private-variable.513806/ for further 		
     public InputField emailInput;
     public InputField passwordInput;
     public string serverBaseDirectoryUrl = "https://client.draggie.games";
@@ -81,6 +85,8 @@ public class login : MonoBehaviour
                 finally
                 {
                     // no idea what this does but it was in the example code
+					// https://gist.github.com/gashupl/27e4de6bd8f021f3d61b3122e6bbf775
+					// todo: read more into https://stackoverflow.com/questions/13486715/net-rsa-createephemeralkey-vs-persistkeyincsp
                     rsa.PersistKeyInCsp = false;
                 }
             }
@@ -118,7 +124,8 @@ public class login : MonoBehaviour
         //Debug.Log($"line 34: {errorText}");
 
         try {
-            Debug.Log("Login button clicked");
+			// Todo: use private attributes or ScriptingAPI [SerializeField]
+            Debug.Log("Login button clicked!");
 
             GameObject inputField = GameObject.Find("TMP_Password");  // This should be the input parent field and not the child text field.
             string email = GameObject.Find("emailText").GetComponent<TextMeshProUGUI>().text;
@@ -135,10 +142,15 @@ public class login : MonoBehaviour
 
             // Sanitise email and password, remove u200b (zero width space) and trim
             // for some reason, the input field adds a zero width space to the end of the string
+			// writeup: talk about this
             email = email.Replace("\u200b", "");
             password = password.Replace("\u200b", "");
-            email = email.Trim();
+			
+			// Now removes extra trailing or leading white spaces, (https://learn.microsoft.com/en-us/dotnet/api/system.string.trim?view=net-8.0)
+			// which may not have been caught in the zero width space incident?
+            email = email.Trim(); 
             password = password.Trim();
+			// whywhywhywhywhywhywhywhywhywhywhywhy
 
             // if no email or password
             if (email == "" || password == "")
@@ -175,13 +187,16 @@ public class login : MonoBehaviour
                     try
                     {
                         // these are handled by the server
-                        dynamic parsedJsonResponse = JObject.Parse(responseString);
+                        dynamic parsedJsonResponse = JObject.Parse(responseString); // Todo: change this to a defined class attribute or something from known server)
+						// docs: "The dynamic type is a static type, but dynamic objects bypass static type checking"
                         ChangeErrorMessage($"An error has occurred.\n\nHTTP status code: [error {responseStatusCode}]\nDetailed message: {parsedJsonResponse.message}");
                         updateInformationMessage($"{parsedJsonResponse.message}. Please try again.");
                     }
                     catch (Exception e)
+					// If the server is not online, then there may be 501 errors, and the response from e.g. Cloudflare may not include a JSON object to parse, throwing this
+					// This may also be thrown if the user is offline.
+					// todo: test offline functionality more. -> use AutoTokenlogin
                     {
-                        // server can be tempramental so we need to handle unhandled server errors (does that make sense?)
                         ChangeErrorMessage($"It looks like the login server is currently experiencing issues. Please try again later!\n\n\nTechnical details: {e}");
                         updateInformationMessage("Login server error. Please try again later.", "FF0000");
                     }
@@ -193,6 +208,7 @@ public class login : MonoBehaviour
                 Debug.Log($"[OnLoginButtonClicked] it seems like it worked! {responseString}");
                 
                 dynamic parsedResponse = JObject.Parse(responseString);
+				// docs: "The dynamic type is a static type, but dynamic objects bypass static type checking"
                 updateInformationMessage($"Checking user entitlements...");
                 var accessToken = parsedResponse.auth_token; // This is very important, as it acts as a session cookie. If someone gets this, they can log in as you.
                 var username = $"{parsedResponse.account}";
@@ -216,10 +232,10 @@ public class login : MonoBehaviour
                         // use Headers for Servers Version 0.8.6 and above
                         // Nicked from https://stackoverflow.com/questions/29801195/adding-headers-when-using-httpclient-getasync
                         const string ValidationPath = "/api/v1/saturnian/game/gameData/licenses/validation";
-                        client.DefaultRequestHeaders.Add("Authorisation", $"{accessToken}");
+                        client.DefaultRequestHeaders.Add("Authorisation", $"{accessToken}"); // TODO: Maybe change to American spelling for proper standardiZation of RESTful API
                         client.DefaultRequestHeaders.Add("User-Agent", "unity/draggiegames-compsciproject");
 
-                        var response = await client.GetAsync($"{serverBaseDirectoryUrl}{ValidationPath}");
+                        var response = await client.GetAsync($"{serverBaseDirectoryUrl}{ValidationPath}"); // Must use await in an async function
                         var responseString = await response.Content.ReadAsStringAsync();
                         var responseStatusCode = response.StatusCode;
                         if (responseStatusCode != HttpStatusCode.OK) {
@@ -230,12 +246,12 @@ public class login : MonoBehaviour
                             } catch (Exception e) {
                                 ChangeErrorMessage($"The server had a difficulty handling your request! Sorry about that.\n\nRaw error: {e}");
                                 updateInformationMessage($"Technical error. Please try again.");
-                            }
+                            } // todo: add finally? 
                             GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().text = "Login";
                             GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().enabled = true;
                             return;
                         }
-                        // else it is okay
+                        // The try catch block above means that only if the server has handled the message one way or another, it is okay to be processed below
                         updateInformationMessage($"Saving credentials...");
 
                         dynamic parsedResponse = JObject.Parse(responseString);
@@ -262,12 +278,13 @@ public class login : MonoBehaviour
                         if (access) {
                             // allow in
                             WriteEncryptedAuthToken(accessToken);
+							// writeup: note: had difficultu seeing where there was an issue here. must stringify the token else it can't write to playerprefs.
                             updateInformationMessage($"Loading game...");
                             PlayerPrefs.SetString("DraggieGamesEmail", email);
                             Debug.Log($"[SavePlayerPrefs] Saved email to PlayerPrefs ({email})");
                             PlayerPrefs.SetString("SaturnianUsername", $"{username}");
                             Debug.Log($"[SavePlayerPrefs] Saved username to PlayerPrefs ({username})");
-                            PlayerPrefs.SetString("accessToken", $"{accessToken}");
+                            PlayerPrefs.SetString("accessToken", $"{accessToken}"); // todo: make this more secure, playerprefs not seciure
                             Debug.Log($"[SavePlayerPrefs] Saved accessToken to PlayerPrefs ({accessToken})");
 
                             // SceneManager.LoadScene("MainScene", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
@@ -285,6 +302,7 @@ public class login : MonoBehaviour
                 checkEntitlements();
             }
         } catch (Exception e) {
+			// writeup: somewhere about textmeshpro in dev of written solutoin
             GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().text = "Login";
             GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().enabled = true;
             Debug.LogError($"An error has occurred: {e}");
@@ -307,28 +325,37 @@ public class login : MonoBehaviour
         // Password input field from https://forum.unity.com/threads/changing-inputfield-contenttype-via-script-does-not-update-text.935525/
         var passwordInput = GameObject.Find("PassText");
         Debug.Log($"[Start] passwordInput: {passwordInput}");
+		// docs: writeup: This is important to show stars in the password (*****) instead of the actual password (security risk)
+		// writeup: End user requested this feature
         passwordInput.GetComponent<TMP_InputField>().contentType = TMP_InputField.ContentType.Password;
         Debug.Log($"[Start] changed passwordInput.contentType to password");
+		// todo: codereview: Just a thought, is passwordfield.cs now needed any more? Doesn't it do the same as the above?
 
         // now we need to passText.textComponent.SetAllDirty();
 
         var passwordInputField = GameObject.Find("PassText");
-        if (passwordInputField != null)
+        if (passwordInputField != null) // Just checking... not sure when this won't be True but good practice.
         {
             var pInputted = passwordInput.GetComponent<TMP_InputField>();
             if (pInputted != null && pInputted.textComponent != null)
             {
                 pInputted.contentType = TMP_InputField.ContentType.Password;
                 pInputted.textComponent.SetAllDirty();
+				
+				// writeup: docs: Note that despite the sheer lack of documentation about SetAllDirty func it marks the graphic as having been changed. 
+				// The Scripting API literally just says: "Mark the Graphic as dirty."
+				// Found this out in https://github.com/Pinkuburu/Unity-Technologies-ui/blob/master/UnityEngine.UI/UI/Core/Graphic.cs. Go to line 251 and it's on line 266
             }
             else
             {
-                Debug.LogError("TMP_InputField or its textComponent is missing");
+                Debug.LogError("TMP_InputField or its textComponent is missing on PassText (if it is not in the scene this is ezpected)");
+				// We need the password input field to have a text component to actually get it.
             }
         }
         else
         {
             Debug.LogError("PassText GameObject not found");
+			// Most likely only in scenes where there is this specific script loaded but 
         }
 
 

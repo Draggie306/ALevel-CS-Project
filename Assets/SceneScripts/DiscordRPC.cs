@@ -17,18 +17,21 @@ using Discord;
 
 public class DiscordRPC : MonoBehaviour
 {
-    public long clientId = 899342308372254840;
-    public string state = "Playing";
-    public string details = "techDemo";
-    public string largeImage = "https://cdn.jsdelivr.net/gh/Draggie306/iBaguette@main/media/cats/CatswirlOptimised";
-    public string largeText = "Unity";
+    private long clientId = 899342308372254840;
+
+    [SerializeField]
+    private string ThirdLine = "Playing"; // actually "state" in the SDK
+    public string SecondLine = "Inside the main menu";  // really the "Details" in sdk
+    public string largeImage = "https://assets.draggie.games/saturnian-content/Saturnian-1080.png";
+    public string largeText = "Follow @SaturnianGame for more!";
 
     private Discord.Discord discord;
     private ActivityManager activityManager;
 
     void Start()
     {
-        discord = new Discord.Discord(clientId, (UInt64)CreateFlags.Default);
+        Debug.Log($"[DiscordRPC] Initialising Discord rich presence on object: \"{gameObject.name}\"");
+        discord = new Discord.Discord(clientId, (UInt64)Discord.CreateFlags.Default);// we DO require discord or there will be loads of exceptions (NullReferenceException: Object reference not set to an instance of an object DiscordRPC.Update () (at Assets/SceneScripts/DiscordRPC.cs:81))
         activityManager = discord.GetActivityManager();
         UpdateActivity();
     }
@@ -37,23 +40,40 @@ public class DiscordRPC : MonoBehaviour
     {
         var activity = new Activity
         {
-            State = state,
-            Details = details,
+            State = ThirdLine,
+            Details = SecondLine,
             Timestamps = { Start = DateTimeOffset.Now.ToUnixTimeSeconds() },
-            Assets = { LargeImage = largeImage, LargeText = largeText }
+            Assets = { LargeImage = largeImage, LargeText = largeText },
+            // Secrets = { Join = "https://ibaguette.com", Spectate = "https://draggiegames.com" }, // TODO: Make these work
         };
 
+
+        // Code copied from the example on discord game sdk docs
         activityManager.UpdateActivity(activity, (res) => 
         {
             if (res == Result.Ok)
             {
-                Debug.Log("Successfully updated activity.");
+                Debug.Log("[DiscordRPC] Successfully updated activity.");
             }
             else
             {
-                Debug.LogError("Failed to update activity.");
+                Debug.LogError($"[DiscordRPC] Failed to update activity: {res}");
             }
         });
+    }
+
+
+    // Project extra: Call from onclick event
+    public void UpdateSecondLine(string newSecondLine)
+    {
+        SecondLine = newSecondLine;
+        UpdateActivity();
+    }
+
+    public void UpdateThirdLine(string newThirdLine)
+    {
+        ThirdLine = newThirdLine;
+        UpdateActivity();
     }
 
     void Update()

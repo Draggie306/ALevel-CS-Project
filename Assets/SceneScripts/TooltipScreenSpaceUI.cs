@@ -40,8 +40,8 @@ public class TooltipScreenSpaceUI : MonoBehaviour
         Vector2 padding = new Vector2(10, 8);
         backgoundRectTransform.sizeDelta = textSize + padding;
 
-
-        Debug.Log($"[TooltipScreenSpaceUI] Set tooltip text to '{tooltipText}'");
+        // Comment out else log gets spammed    
+        // Debug.Log($"[TooltipScreenSpaceUI] Set tooltip text to '{tooltipText}'");
     }
 
 

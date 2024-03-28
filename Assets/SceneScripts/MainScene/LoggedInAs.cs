@@ -8,11 +8,13 @@ public class LoggedInAs : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        var uuid = new System.Guid(SystemInfo.deviceUniqueIdentifier);
+        PlayerPrefs.SetString("SaturnianUsername", "Guest");
+        var deviceUID = SystemInfo.deviceUniqueIdentifier;
+        string uuid = System.Guid.NewGuid().ToString();
 
         Debug.Log($"LoggedInAs is attached to {gameObject.name}");
         Debug.Log("Attempting to update LoggedInAsText");
-        LoggedInAsText.text = $"Logged in as: {PlayerPrefs.GetString("SaturnianUsername")} ({PlayerPrefs.GetString("DraggieGamesEmail")} - {uuid.ToString()})";
-        Debug.Log($"Updated LoggedInAsText to {LoggedInAsText.text}");
+        LoggedInAsText.text = $"Logged in as: {PlayerPrefs.GetString("SaturnianUsername")} ({PlayerPrefs.GetString("DraggieGamesEmail")})\ndevice id: {deviceUID.ToString()}\nmatchmaker session id: {uuid}";
+        Debug.Log($"Updated LoggedInAsText to '{LoggedInAsText.text}'");
     }
 }

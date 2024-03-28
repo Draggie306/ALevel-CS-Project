@@ -10,11 +10,13 @@ using UnityEngine;
 
 public class SwitchSubmenus : MonoBehaviour
 {
+    // note: Don't drag this script to any old GameObject, it is placed on the root canvas
     public GameObject MainMenuMain;
     public GameObject GraphicsSubMenu;
     public GameObject LockerSubMenu;
     public GameObject SelectGameModeMenu;
     public GameObject AccountMenu;
+    public GameObject AdvancedGraphicsMenu;
     private AudioSource[] allAudioSources;
 
     public void StopAllAudio() {
@@ -25,7 +27,7 @@ public class SwitchSubmenus : MonoBehaviour
         }
     }
 
-    public int CurrentMenu = 0; // 0 = MainMenuMain, 1 = GraphicsSubMenu, 2 = LockerSubMenu, 3 = SelectGameMode, 4 = AccountMenu
+    public int CurrentMenu = 0; // 0 = MainMenuMain, 1 = GraphicsSubMenu, 2 = LockerSubMenu, 3 = SelectGameMode, 4 = AccountMenu, 5 = AdvancedGraphicsMenu
 
     // Start is called before the first frame update
     void Start()
@@ -38,6 +40,7 @@ public class SwitchSubmenus : MonoBehaviour
         LockerSubMenu.SetActive(false);
         SelectGameModeMenu.SetActive(false);
         AccountMenu.SetActive(false);
+        AdvancedGraphicsMenu.SetActive(false);
     }
 
     public void SwitchToGraphicsSubMenu()
@@ -48,6 +51,7 @@ public class SwitchSubmenus : MonoBehaviour
         LockerSubMenu.SetActive(false);
         SelectGameModeMenu.SetActive(false);
         AccountMenu.SetActive(false);
+        AdvancedGraphicsMenu.SetActive(false);
     }
 
     public void SwitchToLockerSubMenu()
@@ -58,7 +62,7 @@ public class SwitchSubmenus : MonoBehaviour
         GraphicsSubMenu.SetActive(false);
         SelectGameModeMenu.SetActive(false);
         AccountMenu.SetActive(false);
-        StopAllAudio();
+        //StopAllAudio();
     }
 
     public void SwitchToGameModeSelect()
@@ -89,5 +93,18 @@ public class SwitchSubmenus : MonoBehaviour
         MainMenuMain.SetActive(true);
         SelectGameModeMenu.SetActive(false);
         AccountMenu.SetActive(false);
+    }
+
+    public void SwitchToAdvancedGraphicsMenu()
+    {
+        Debug.Log("Switching to advanced graphics menu");
+        // Switch to the advanced graphics menu
+        CurrentMenu = 5;
+        GraphicsSubMenu.SetActive(false);
+        LockerSubMenu.SetActive(false);
+        MainMenuMain.SetActive(false);
+        SelectGameModeMenu.SetActive(false);
+        AccountMenu.SetActive(false);
+        AdvancedGraphicsMenu.SetActive(true);
     }
 }

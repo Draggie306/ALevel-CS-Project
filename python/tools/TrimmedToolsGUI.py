@@ -6,7 +6,8 @@ from os import mkdir, path, system, environ
 from subprocess import Popen
 from datetime import datetime
 from time import sleep, time
-from turtle import update
+import tkinter
+from tkinter.ttk import Progressbar
 from uuid import uuid4
 from tqdm import tqdm
 from typing import Optional
@@ -15,7 +16,6 @@ import logging
 import zipfile
 from threading import Thread
 import base64
-from math import ceil
 from cryptography.fernet import Fernet
 import json
 import hashlib
@@ -53,62 +53,115 @@ clear_from_line_start = "\033[1K"
 clear_above_line_overwrite = "\033[F\033[K"
 
 
-system(f"title TrimmedDraggieTools v{version} (build {build}) initialised")
+system(f"title TrimmedSaturnianInstaller v{version} (build {build}) initialised")
 
 environ_dir = environ['USERPROFILE']
 start_time = time()
 
 
 if not dev_mode:
-    DraggieTools_AppData_Directory = (f"{environ_dir}\\AppData\\Roaming\\Draggie\\TrimmedDraggieTools")
+    SaturnianInstaller_AppData_Directory = (f"{environ_dir}\\AppData\\Roaming\\Draggie\\TrimmedSaturnianInstaller")
     Draggie_AppData_Directory = (f"{environ_dir}\\AppData\\Roaming\\Draggie")
     #   Fixes issues on first-time entry.
     if not path.exists(Draggie_AppData_Directory):
         mkdir(f"{environ_dir}\\AppData\\Roaming\\Draggie\\")
-    if not path.exists(DraggieTools_AppData_Directory):
-        mkdir(DraggieTools_AppData_Directory)
+    if not path.exists(SaturnianInstaller_AppData_Directory):
+        mkdir(SaturnianInstaller_AppData_Directory)
 else:
     uuid_gen = uuid4()
     # uuid_gen = "test1234"
-    DraggieTools_AppData_Directory = (f"{environ_dir}\\AppData\\Roaming\\Draggie{uuid_gen}\\TrimmedDraggieTools")
+    SaturnianInstaller_AppData_Directory = (f"{environ_dir}\\AppData\\Roaming\\Draggie{uuid_gen}\\TrimmedSaturnianInstaller")
     Draggie_AppData_Directory = (f"{environ_dir}\\AppData\\Roaming\\TrimmedDraggie{uuid_gen}")
 
     if not path.exists(Draggie_AppData_Directory):
         mkdir(f"{environ_dir}\\AppData\\Roaming\\Draggie{uuid_gen}\\")
-    if not path.exists(DraggieTools_AppData_Directory):
-        mkdir(DraggieTools_AppData_Directory)
+    if not path.exists(SaturnianInstaller_AppData_Directory):
+        mkdir(SaturnianInstaller_AppData_Directory)
 
-if not path.exists(f"{DraggieTools_AppData_Directory}\\Logs"):
-    mkdir(f"{DraggieTools_AppData_Directory}\\Logs")
-    print(f"[MainInit] Made DraggieTools_AppData_Directory Logs: {DraggieTools_AppData_Directory}\\Logs", 2)
+if not path.exists(f"{SaturnianInstaller_AppData_Directory}\\Logs"):
+    mkdir(f"{SaturnianInstaller_AppData_Directory}\\Logs")
+    print(f"[MainInit] Made SaturnianInstaller_AppData_Directory Logs: {SaturnianInstaller_AppData_Directory}\\Logs", 2)
 
-if not path.exists(DraggieTools_AppData_Directory):
-    mkdir(DraggieTools_AppData_Directory)
-    print(f"[MainInit] Made DraggieTools_AppData_Directory: {DraggieTools_AppData_Directory}", 2)
-
-if not path.exists(f"{DraggieTools_AppData_Directory}\\UpdatedBuildsCache"):
-    mkdir(f"{DraggieTools_AppData_Directory}\\UpdatedBuildsCache")
-    print(f"[MainInit] Made UpdatedBuildsCache Directory: {DraggieTools_AppData_Directory}\\UpdatedBuildsCache", 2)
-
-if not path.exists(f"{DraggieTools_AppData_Directory}\\SourceCode"):
-    mkdir(f"{DraggieTools_AppData_Directory}\\SourceCode")
-    print(f"[MainInit] Made SourceCode Directory: {DraggieTools_AppData_Directory}\\SourceCode", 2)
-
+if not path.exists(SaturnianInstaller_AppData_Directory):
+    mkdir(SaturnianInstaller_AppData_Directory)
+    print(f"[MainInit] Made SaturnianInstaller_AppData_Directory: {SaturnianInstaller_AppData_Directory}", 2)
 
 def tqdm_download(download_url, save_dir, desc: Optional[str] = None, overwrite: Optional[bool] = False, return_exceptions: Optional[bool] = False):
     # Networking component codename is dash
     def download_file(download_url, save_dir):
         response = dash_get(download_url, stream=True)
         total_size = int(response.headers.get("content-length", 0))
-        block_size = 1024  # 1 Kibibyte
-        written = 0
+        block_size = 102400  # 100 kibis (faster)
         desc = download_url.split("/")[-1]
         log(f"Attempting to download a file. Content length: {total_size} bytes. ({download_url})", 1, False, component="dash")
         print(blue_colour)
-        with open(save_dir, "wb") as f:
+
+        # Tkinter progress bar - https://stackoverflow.com/questions/33768577/tkinter-gui-with-progress-bar
+        tki = tk.Tk()
+        progress = Progressbar(tki, orient="horizontal", length=200, mode="determinate")
+
+        def bar():
+            written = 0
+            with open(save_dir, "wb") as f:
+                for chunk in requests.get(download_url, stream=True).iter_content(chunk_size=block_size):
+                    if chunk:
+                        f.write(chunk)
+                        progress['value'] = int(written / total_size * 100)
+                        tki.update_idletasks()
+                        written = written + len(chunk)
+                        log(f"Downloaded {written} bytes of {total_size} bytes", 1, False, component="dash")
+            tki.destroy()
+        progress.pack()
+        
+        """
+        t = Thread(target=bar)
+        t.start()
+        tki.mainloop()"""
+
+        bar() # todo: this will not update the pbar
+
+        # old:
+        """
+        ## todo: fix this, what a load of mess
+
+        def bar():
+            written = 0
+            with open(save_dir, "wb") as f:
+                for chunk in requests.get(download_url, stream=True).iter_content(chunk_size=block_size):
+                    if chunk:
+                        f.write(chunk)
+                        written = written + len(chunk)
+                        q.put(written)
+                        log(f"Downloaded {written} bytes of {total_size} bytes", 1, False, component="dash")
+
+        def update_progress(q):
+            while True:
+                written = q.get()
+                progress['value'] = int(written / total_size * 100)
+                tki.update_idletasks()
+                if written >= total_size:
+                    break
+
+        # Tkinter progress bar - https://stackoverflow.com/questions/33768577/tkinter-gui-with-progress-bar
+        tki = tk.Tk()
+        progress = Progressbar(tki, orient="horizontal", length=200, mode="determinate")
+        progress.pack()
+
+        # Queue main thread - https://stackoverflow.com/questions/62462194/tkinter-tcl-asyncdelete-async-handler-deleted-by-the-wrong-thread-how-to-hand
+        q = Queue()
+        t = Thread(target=bar, args=(q,))
+        t.start()
+
+        bar()
+
+        update_progress(q)
+
+        tki.mainloop()"""
+
+        """with open(save_dir, "wb") as f:
             for data in tqdm(response.iter_content(block_size), total=ceil(total_size // block_size), unit="KB", desc=desc):
                 written = written + len(data)
-                f.write(data)
+                f.write(data)"""
         print(reset_colour)
         log(f"Downloaded the file! {total_size} bytes. ({download_url})", 1, False, component="dash")
 
@@ -132,14 +185,14 @@ Here are the prints for directory determining.
 """
 
 if dev_mode:
-    print(f"\n\n*-* Beta Tester Prints *-*\n\nAppData Directory: {DraggieTools_AppData_Directory}")
+    print(f"\n\n*-* Beta Tester Prints *-*\n\nAppData Directory: {SaturnianInstaller_AppData_Directory}")
     sleep(0.05)
     print(f"Executable location (Where the EXE file is saved locally): {sys.executable}")
     sleep(0.05)
     print(f"Absolute Application Path (Wher PyInstaller runs EXE from): {path.dirname(path.abspath(__file__))}\n\nDevmode is ON, therefore enhanced logging is active.\nThe log file is located in the Roaming AppData directory")
     sleep(0.05)
 
-logging.basicConfig(filename=f'{DraggieTools_AppData_Directory}\\Logs\\[{username}]_{version}-{build}-{time()}.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename=f'{SaturnianInstaller_AppData_Directory}\\Logs\\[{username}]_{version}-{build}-{time()}.log', encoding='utf-8', level=logging.DEBUG)
 logging.debug(f'Established uplink at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
 
 directory = sys.executable
@@ -341,7 +394,7 @@ def projectsaturnian():
         email = email_entry.get()
         password = password_entry.get()
         log(f"{blue_colour}Logging in...")
-        login = dash_post("https://client.draggie.games/login", json={"email": email, "password": password, "from": "SaturnianUpdater/DraggieTools"})
+        login = dash_post("https://client.draggie.games/login", json={"email": email, "password": password, "from": "SaturnianUpdater/SaturnianInstaller"})
         print(f"received login content: {login.content}")
         login_window.destroy()  # close the window after successful login
 
@@ -433,14 +486,16 @@ def projectsaturnian():
 
     def token_login(token):
         endpoint = "https://client.draggie.games/token_login"
-        login = dash_post(endpoint, json={"token": token, "from": "SaturnianUpdater/DraggieTools"})
+        login = dash_post(endpoint, json={"token": token, "from": "SaturnianUpdater/SaturnianInstaller"})
         if login.status_code == 200:
             response = json.loads(login.content)
             log(f"{green_colour}Token login successful. Received response: {response}", output=False)
             return token
         else:
             log(f"{red_colour}Token login failed.")
-            choice1()
+            sleep(2)
+            log(f"Attepting to clear the token file and log in again...")
+            return projectsaturnian()
         # log(f"Received token login content: {login.content}")
 
     new_token = token_login(token)
@@ -451,13 +506,24 @@ def projectsaturnian():
     def get_saturnian_info(known_token):
         log("Getting Saturnian info...")
         endpoint = "https://client.draggie.games/api/v1/saturnian/game/gameData/licenses/validation"
-        x = dash_get(endpoint, json={"token": known_token, "from": "SaturnianUpdater/TrimmedDraggieTools"})
+        x = dash_get(endpoint, json={"token": known_token, "from": "SaturnianUpdater/TrimmedSaturnianInstaller"})
         if x.status_code == 200:
             try:
                 response = json.loads(x.content)
-                log(f"[saturnian/OnlineAccount] Your tier: {green_colour}{response['type']}")
-                log(f"[saturnian/OnlineAccount] Saturnian current version: {green_colour}v{response['currentVersion']}")
-                return response
+                for entitlement in response["entitlements"]: # id expression; response['entitlements']['saturnian_alpha_tester']['id']
+                    if entitlement == "saturnian_alpha_tester":
+                        log(f"[saturnian/OnlineAccount] Your entitlement: {green_colour}{response['entitlements']['saturnian_alpha_tester']['friendlyName']}")
+                        log(f"[saturnian/OnlineAccount] Your tier: {green_colour}{response['entitlements']['saturnian_alpha_tester']['type']}")
+                        sleep(1)
+                    elif entitlement == "saturnian_beta_tester":
+                        log(f"[saturnian/OnlineAccount] Your entitlements: {green_colour}{response['entitlements']['saturnian_beta_tester']['friendlyName']}")
+                        log(f"[saturnian/OnlineAccount] Your tier: {green_colour}{response['entitlements']['saturnian_beta_tester']['type']}")
+                        sleep(1)
+                    else:
+                        log("[saturnian/OnlineAccount] it doesn't look like you have any entitlements, redeem a code at draggiegames.com.", log_level=3)
+                        sleep(1)
+                        projectsaturnian()
+                    return response['entitlements'][entitlement]
             except Exception as e:
                 log(f"[saturnian/errors.account] Exception: {e}", log_level=4)
                 log(f"[saturnian/errors] Received version status code: {x.status_code}", log_level=4)
@@ -484,9 +550,10 @@ def projectsaturnian():
         Prompts the user to install the AutoUpdate project codename Lily.
         """
         log("\nMake sure to check out the Discord server and assign roles for updates: https://discord.gg/GfetCXH")
-        client = input(f"Note: {orange_colour}Saturnian{reset_colour} is still in development, so there may be bugs.\n\n{orange_colour}NOTICE: To auto update the project, make sure you have {magenta_colour}AutoUpdate{orange_colour} installed.{reset_colour}\nWould you like to open the {magenta_colour}AutoUpdate{reset_colour} menu now? Y/N\n\n>>> ")
-        match client.lower():
-            case "y":
+        #//client = input(f"Note: {orange_colour}Saturnian{reset_colour} is still in development, so there may be bugs.\n\n{orange_colour}NOTICE: To auto update the project, make sure you have {magenta_colour}AutoUpdate{orange_colour} installed.{reset_colour}\nWould you like to open the {magenta_colour}AutoUpdate{reset_colour} menu now? Y/N\n\n>>> ")
+        client = messagebox.askquestion("AutoUpdater", "Would you like to open the AutoUpdater menu now?", icon='info')
+        match client:
+            case "yes":
                 draggieclient()
             case _:
                 log("Okay, returning to main menu...")
@@ -495,11 +562,12 @@ def projectsaturnian():
     # Now, if the server version is different from the local version, we need to update Saturnian.
 
     def download_saturnian_build():
+        # https://stackoverflow.com/questions/33768577/tkinter-gui-with-progress-bar
         download_url = server_json_response["downloadUrl"]
-        log("[saturnian/buildDL] Grabbing authenticated build...")
         log(f"[saturnian/buildDL] Grabbing authenticated build from {download_url}", output=False)
 
         preferred_install_location = read_datafile_attribute("install_dir")
+
         tqdm_download(download_url, f"{preferred_install_location}\\Saturnian.bin", overwrite=True)
 
         log(f"{green_colour}[saturnian/buildDL] Download complete. Decompressing...")
@@ -530,29 +598,48 @@ def projectsaturnian():
 
     preferred_install_location = read_datafile_attribute("install_dir")
     if not os.path.isfile(f"{preferred_install_location}\\SaturnianGame\\Saturnian.exe"):
-        log("[saturnian/Updater] There is no build in the SaturnianGame folder. This might be because you deleted it, or the download failed. Input 1 to download the build, or 0 to return to the main menu.")
-        choice = input("\n\n>>> ")
+        log("[saturnian/Updater] There is no build in the SaturnianGame folder. This might be because you deleted it or the download failed. Input 1 to download the build, or 0 to return to the main menu.")
+        
+        choice = messagebox.askquestion("No build found", "There is no build in the SaturnianGame folder. This might be because you deleted it or the download failed. Would you like to download the build now?", icon='info')
         match choice:
-            case _:
+            case "yes":
                 try:
                     download_saturnian_build()
                     log(f"\n{green_colour}[saturnian/Updater] Update completed!")
                 except Exception as e:
                     return log(f"[saturnian/errors] Error downloading Saturnian build: {e}", log_level=4, event="error")
+            case _:
+                log("Okay, returning to main menu...")
+                projectsaturnian()
 
     to_open = log(f"\n\n{cyan_colour}Manage your installation of the project!{reset_colour}\n\n[0] Back to main menu\n[1] Open the game\n[2] Uninstall the project\n[3] Open the game folder\n[4] Change installation directory\n\n>>> ")
 
     # https://stackoverflow.com/questions/42581016/how-do-i-display-a-dialog-that-asks-the-user-multi-choice-question-using-tkinter
 
-    options = ["Back to main menu", "Open the game", "Uninstall the project", "Open the game folder", "Change installation directory"]
-    prompt = "\n".join(f"[{i}] {option}" for i, option in enumerate(options))
-    to_open = simpledialog.askstring("Manage your installation", prompt)
+    options = ["Back to main menu", "Open the game", "Uninstall the project", "Open the game folder", "Change installation directory", "Install auto-updater", "Exit"]
+
+    # Create a string that holds the cool options with pythonic enumeration
+    prompt = "\n".join(f"[{i}] {option}" for i, option in enumerate(options)) # proudest line of entire projet?!
+
+    # The one liner above I love using so much. the options list is being iterated over and for each one, the string is being formatted so that "for i" increments
+    # the index of the list whilst also adding it to the string between square brackets to make it easer for the user
+    # then the option is being added next to it
+    # and to join them all up with a new line carriage return the join method is being used
+
+    newWin = tk.Tk() # hack fix to prevent weird error https://stackoverflow.com/questions/53480400/tkinter-askstring-deleted-before-its-visibility-changed
+    newWin.withdraw()
+    to_open = simpledialog.askstring("Manage your installation", prompt, parent=newWin)
+
+    newWin.destroy()
 
     # to_open = messagebox.askquestion("Manage your installation", "What would you like to do?", icon='info')
+    if not to_open:  # User has close dthe window
+        return sys.exit(1)
+
     match to_open.lower():
-        case "1":
+        case "0":
             return projectsaturnian()
-        case "open the game":
+        case "1":
             preferred_install_location = read_datafile_attribute("install_dir")
             Popen(f"{preferred_install_location}\\SaturnianGame\\Saturnian.exe")
             sleep(4)
@@ -576,10 +663,10 @@ def projectsaturnian():
                 log(f"{green_colour}[saturnian/Updater] Saturnian uninstalled successfully.")
             except Exception as e:
                 return log(f"[saturnian/errors] Error uninstalling Saturnian: {e}", log_level=4, event="error")
-        case "open the game folder":
+        case "3":
             preferred_install_location = read_datafile_attribute("install_dir")
             Popen(f'explorer /select,"{preferred_install_location}\\SaturnianGame\\Saturnian.exe"')
-        case "change installation directory":
+        case "4":
             log("[saturnian/Updater] Changing installation directory...")
             start_time = time()
             try:
@@ -601,6 +688,8 @@ def projectsaturnian():
                 sleep(2)
             except Exception as e:
                 return log(f"[saturnian/errors] Error changing installation directory: {e}\n{traceback.format_exc()}", log_level=4, event="error")
+        case "5":
+            promote_project_lily()
         case _:
             log(f"{red_colour}[saturnian/Updater] Invalid option. Please try again.")
             sleep(1)
@@ -691,11 +780,11 @@ status_label.pack()
 frame = tk.Frame(root)
 frame.pack()
 
-button = tk.Button(frame, text="Run Project Saturnian", command=run_projectsaturnian)
+button = tk.Button(frame, text="Run Project Saturnian") # do NOT include command=run_projectsaturnian as this will call the func twice
 button.bind('<Button-1>', start_thread)
 button.pack(side=tk.LEFT)
 
-text_area = scrolledtext.ScrolledText(root, wrap = tk.WORD, width = 40, height = 10, font = ("Times New Roman",15))
+text_area = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=40, height=10, font=("Times New Roman", 15))
 text_area.pack()
 
 root.mainloop()

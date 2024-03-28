@@ -35,7 +35,8 @@ public class HealthTest : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        healthText.text = "HEALTH: " + health.ToString() + "%";
+        string completehealthStr = $"HEALTH: {health.ToString()}%";
+        healthText.text = completehealthStr;
 
         if(Input.GetKeyDown(KeyCode.Space))
         {

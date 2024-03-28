@@ -19,7 +19,7 @@ using System.IO;
 /// </summary>
 
 public class initialUsernameJsonDict {
-    // TODO: naming rule violation fix
+    // TODO: naming rule violation fix - PascalCase (future development)
     public string email { get; set; }
     public string password { get; set; }
     #nullable enable
@@ -130,6 +130,8 @@ public class login : MonoBehaviour
             GameObject inputField = GameObject.Find("TMP_Password");  // This should be the input parent field and not the child text field.
             string email = GameObject.Find("emailText").GetComponent<TextMeshProUGUI>().text;
 
+            //string password = GameObject.Find("PassText").GetComponent<TextMeshProUGUI>().text; // Comment this out when writeup done: this is not good!!
+
             string password = inputField.GetComponent<TMP_InputField>().text; // https://discussions.unity.com/t/how-to-get-text-from-textmeshpro-input-field/215584
             // string password = GameObject.Find("PassText").GetComponent<TMP_InputField>().text; 
             // 0.0.9: changed from InputField to TMP_InputField as the password field was returning "***" instead of the password
@@ -137,7 +139,6 @@ public class login : MonoBehaviour
             // Taken from: https://forum.unity.com/threads/change-inputfield-input-from-standard-to-password-text-via-script.291897/
 
             GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().text = "Logging in...";
-            
             Debug.Log($"Email: {email}, Password: {password}");
 
             // Sanitise email and password, remove u200b (zero width space) and trim
@@ -152,14 +153,14 @@ public class login : MonoBehaviour
             password = password.Trim();
 			// whywhywhywhywhywhywhywhywhywhywhywhy
 
-            // if no email or password
+            // basic test for no email or password
             if (email == "" || password == "")
             {
                 //ChangeErrorMessage("Please enter an email and password");
                 updateInformationMessage("Please enter an email and password!");
                 GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().text = "Login";
                 GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().enabled = true;
-                return;
+                return; // early return to prevent further execution of fnction
             } else {
                 Debug.Log("Email and password seem to have been entered");
             }
@@ -171,13 +172,14 @@ public class login : MonoBehaviour
                 scope = "unity/draggiegames-compsciproject" // this can also be called the user agent
             };
 
-            string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(loginAccount); // JsonConvert.SerializeObject converts the object to a JSON string, which is what the server expects
+            string jsonString = JsonConvert.SerializeObject(loginAccount); // JsonConvert.SerializeObject converts the object to a JSON string, which is what the server expects
             updateInformationMessage("Logging in to Draggie Games account...");
 
             using (HttpClient client = new HttpClient())
             // TODO: Use UnityWebRequest instead of HttpClient because it's probably better
             {
-                var response = await client.PostAsync($"{serverBaseDirectoryUrl}/login", new StringContent(jsonString, Encoding.UTF8, "application/json"));
+                var response = await client.PostAsync($"{serverBaseDirectoryUrl}/login", 
+                new StringContent(jsonString, Encoding.UTF8, "application/json"));
 
                 var responseString = await response.Content.ReadAsStringAsync();
                 var responseStatusCode = response.StatusCode;

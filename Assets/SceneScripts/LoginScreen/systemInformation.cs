@@ -6,7 +6,7 @@ using TMPro;
 /// Gets the system information and displays it in tmproGUI for debugging
 /// </summary>
 
-public class ExampleClass : MonoBehaviour
+public class SystemDataDevelopmentDisplayer : MonoBehaviour
 {
     void Start()
     {

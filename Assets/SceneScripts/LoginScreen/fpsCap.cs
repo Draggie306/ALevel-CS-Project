@@ -12,16 +12,15 @@ public class CapFPS : MonoBehaviour
 
     public int target = 144;
 
-    [SerializeField] // todo, writeup: this can make private fields visible in the editor
+    [SerializeField]
     private bool IsEnabled = true; // default: dont want to click an extra button if we drag the script onto an objec.t
 
     void Start()
     {
         Debug.Log($"[CapFPS] Initialised fpsCap.cs on object: \"{gameObject.name}\"");
         if (!IsEnabled) {Debug.Log("[CapFPS] FPS Capping isnot enabled in thus scene! Not doing it"); return;}
-        QualitySettings.vSyncCount = 0;
-        Debug.Log($"[CapFPS] Target vSync has been disabled to allow for frameratecapping of {target}, see below");
-        Application.targetFrameRate = target;
-        Debug.Log($"[CapFPS] Target frame rate has been set to {target}");
+        int TargetFPS = PlayerPrefs.GetInt("TargetFPS", target);
+        Application.targetFrameRate = TargetFPS;
+        Debug.Log($"[CapFPS] Target FPS set to {Application.targetFrameRate}");
     }
 }

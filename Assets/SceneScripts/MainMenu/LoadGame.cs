@@ -13,7 +13,7 @@ public class LoadGame : MonoBehaviour
 {
     public TextMeshProUGUI LoginButtonText;
 
-    public async void LoadGameAsync()
+    public void LoadGameAsync()
     {
         Debug.Log("LoadGameAsync() called");
         LoginButtonText.text = "Loading...";

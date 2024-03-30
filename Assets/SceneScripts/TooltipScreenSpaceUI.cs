@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using JetBrains.Annotations;
 
 /// <summary>
 /// https://www.youtube.com/watch?v=YUIohCXt_pc 
@@ -15,7 +16,8 @@ public class TooltipScreenSpaceUI : MonoBehaviour
     private RectTransform backgoundRectTransform;
     private TextMeshProUGUI textMeshPro;
     private RectTransform rectTransform;
-
+    public bool IsMouseOverTooltip;
+    public Vector3 Offset = new(4, 8);
     private System.Func<string> getTooltipTextFunc;
     private void Awake()
     {
@@ -37,7 +39,7 @@ public class TooltipScreenSpaceUI : MonoBehaviour
         textMeshPro.ForceMeshUpdate();
 
         Vector2 textSize = textMeshPro.GetRenderedValues(false);
-        Vector2 padding = new Vector2(10, 8);
+        Vector2 padding = new(10, 8);
         backgoundRectTransform.sizeDelta = textSize + padding;
 
         // Comment out else log gets spammed    
@@ -45,11 +47,13 @@ public class TooltipScreenSpaceUI : MonoBehaviour
     }
 
 
-    private void Update()
+    void Update()
     {
+        var CheckIfMouseIsOverTooltip = RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Input.mousePosition);
+        // Debug.Log($"[TooltipScreenSpaceUI] CheckIfMouseIsOverTooltip: {CheckIfMouseIsOverTooltip}");
         SetText(getTooltipTextFunc());
 
-        Vector2 anchoredPosition = Input.mousePosition / canvasRectTransform.localScale.x + new Vector3(4, 6); //add offset to make it appear jut above the mouse
+        Vector2 anchoredPosition = Input.mousePosition / canvasRectTransform.localScale.x + Offset;// add offset to make it appear above the mouse
 
         if (anchoredPosition.x + backgoundRectTransform.rect.width > canvasRectTransform.rect.width) 
         {
@@ -97,6 +101,15 @@ public class TooltipScreenSpaceUI : MonoBehaviour
     public static void HideTooltip_Static()
     {
         Instance.HideTooltip();
+    }
+
+    public bool FuncIsMouseOverTooltip()
+    {
+        //https://docs.unity3d.com/ScriptReference/RectTransformUtility.RectangleContainsScreenPoint.html
+        // Looks good to me
+        
+        // Grab the value from the update function
+        return IsMouseOverTooltip;
     }
 
     public Rect GetRect()

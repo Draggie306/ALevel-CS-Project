@@ -10,7 +10,7 @@ using UnityEngine;
 
 public class SwitchSubmenus : MonoBehaviour
 {
-    // note: Don't drag this script to any old GameObject, it is placed on the root canvas
+    // note: Don't drag this script to any old GameObject, it is placed on the root canvas  
     public GameObject MainMenuMain;
     public GameObject GraphicsSubMenu;
     public GameObject LockerSubMenu;

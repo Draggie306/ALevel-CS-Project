@@ -628,7 +628,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c135c7a62022e747a97b232fe572066, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TooltipText: 
+  TooltipText: Visit the account management page
+  OffsetX: 4
+  OffsetY: 8
 --- !u!1 &122995572
 GameObject:
   m_ObjectHideFlags: 0
@@ -1010,6 +1012,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TooltipText: View more detailed credits
+  OffsetX: 4
+  OffsetY: 8
 --- !u!1 &255833054
 GameObject:
   m_ObjectHideFlags: 0
@@ -1874,7 +1878,6 @@ GameObject:
   - component: {fileID: 476042329}
   - component: {fileID: 476042328}
   - component: {fileID: 476042331}
-  - component: {fileID: 476042332}
   m_Layer: 5
   m_Name: bypassLoginButton
   m_TagString: Untagged
@@ -2003,23 +2006,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 476042326}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db65bf31d74d53b4ca838618c194fc99, type: 3}
+  m_Script: {fileID: 11500000, guid: 9c135c7a62022e747a97b232fe572066, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &476042332
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 476042326}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db65bf31d74d53b4ca838618c194fc99, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  TooltipText: Shh...
+  OffsetX: 4
+  OffsetY: 8
 --- !u!1 &594861650
 GameObject:
   m_ObjectHideFlags: 0
@@ -2563,6 +2557,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TooltipText: Supporter
+  OffsetX: 4
+  OffsetY: 8
 --- !u!1 &753650931
 GameObject:
   m_ObjectHideFlags: 0
@@ -2827,6 +2823,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TooltipText: Alpha Tester
+  OffsetX: 4
+  OffsetY: 8
 --- !u!1 &816397428
 GameObject:
   m_ObjectHideFlags: 0
@@ -3170,6 +3168,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TooltipText: Moral Support
+  OffsetX: 4
+  OffsetY: 8
 --- !u!1 &855697404
 GameObject:
   m_ObjectHideFlags: 0
@@ -3655,6 +3655,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canvasRectTransform: {fileID: 1981825748}
+  IsMouseOverTooltip: 0
+  Offset: {x: 4, y: 8, z: 0}
 --- !u!114 &990379242
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3724,7 +3726,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Build configuration: \tAlpha\nEditor version: \t\t2022.3.21f1\n"
+  m_text: "Build configuration: \tAlpha\nEditor version: \t\t2022.3.22f1\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f58d005b7913e0b429664e70ce20f8f7, type: 2}
   m_sharedMaterial: {fileID: -855005974780529926, guid: f58d005b7913e0b429664e70ce20f8f7, type: 2}
@@ -4572,6 +4574,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TooltipText: Opens a new browser window to manage your account settings
+  OffsetX: 4
+  OffsetY: 8
 --- !u!1 &1459133222
 GameObject:
   m_ObjectHideFlags: 0
@@ -5408,6 +5412,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TooltipText: Opens a new browser window\nwith the release history
+  OffsetX: 4
+  OffsetY: 8
 --- !u!1 &1685975415
 GameObject:
   m_ObjectHideFlags: 0
@@ -5463,6 +5469,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TooltipText: Voice actor
+  OffsetX: 4
+  OffsetY: 8
 --- !u!114 &1685975418
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5784,6 +5792,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TooltipText: Draggie306 - Github
+  OffsetX: 4
+  OffsetY: 8
 --- !u!1 &1753923140
 GameObject:
   m_ObjectHideFlags: 0
@@ -6124,7 +6134,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Build date: \t\t\t24/03/2024 20:36\nVersion: \t\t\t\t0.1.6 (a) (22)"
+  m_text: "Build date: \t\t\t30/03/2024 22:12\nVersion: \t\t\t\tv0.1.7 (23) (br)"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f58d005b7913e0b429664e70ce20f8f7, type: 2}
   m_sharedMaterial: {fileID: -855005974780529926, guid: f58d005b7913e0b429664e70ce20f8f7, type: 2}

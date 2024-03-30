@@ -1,0 +1,1 @@
+pyinstaller --onefile "python\installer\Launcher.py" --icon="Z:\SaturnianAlpha\SaturnianGame\Saturnian.exe" --clean --noconsole

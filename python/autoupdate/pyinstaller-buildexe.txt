@@ -1,0 +1,1 @@
+pyinstaller --onefile "python\autoupdate\AutoUpdater.py" --icon="Z:\SaturnianAlpha\SaturnianGame\Saturnian.exe" --clean --noconsole

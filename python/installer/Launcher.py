@@ -39,21 +39,21 @@ start_time = time()
 
 
 if not dev_mode:
-    SaturnianInstaller_AppData_Directory = (f"{environ_dir}\\AppData\\Roaming\\Draggie\\SaturnianInstaller")
-    Draggie_AppData_Directory = (f"{environ_dir}\\AppData\\Roaming\\Draggie")
+    SaturnianInstaller_AppData_Directory = (f"{environ_dir}\\AppData\\Local\\Draggie\\SaturnianInstaller")
+    Draggie_AppData_Directory = (f"{environ_dir}\\AppData\\Local\\Draggie")
     #   Fixes issues on first-time entry.
     if not path.exists(Draggie_AppData_Directory):
-        mkdir(f"{environ_dir}\\AppData\\Roaming\\Draggie\\")
+        mkdir(f"{environ_dir}\\AppData\\Local\\Draggie\\")
     if not path.exists(SaturnianInstaller_AppData_Directory):
         mkdir(SaturnianInstaller_AppData_Directory)
 else:
     uuid_gen = uuid4()
     # uuid_gen = "test1234"
-    SaturnianInstaller_AppData_Directory = (f"{environ_dir}\\AppData\\Roaming\\Draggie{uuid_gen}\\SaturnianInstaller")
-    Draggie_AppData_Directory = (f"{environ_dir}\\AppData\\Roaming\\TrimmedDraggie{uuid_gen}")
+    SaturnianInstaller_AppData_Directory = (f"{environ_dir}\\AppData\\Local\\Draggie{uuid_gen}\\SaturnianInstaller")
+    Draggie_AppData_Directory = (f"{environ_dir}\\AppData\\Local\\TrimmedDraggie{uuid_gen}")
 
     if not path.exists(Draggie_AppData_Directory):
-        mkdir(f"{environ_dir}\\AppData\\Roaming\\Draggie{uuid_gen}\\")
+        mkdir(f"{environ_dir}\\AppData\\Local\\Draggie{uuid_gen}\\")
     if not path.exists(SaturnianInstaller_AppData_Directory):
         mkdir(SaturnianInstaller_AppData_Directory)
 
@@ -333,7 +333,7 @@ def projectsaturnian() -> None:
 
     def write_token(encrypted_token):
         """
-        Writes the unencrypted token to a file. YOU MUST ENCRYPT THE TOKEN BEFORE PASSING IT TO THIS FUNCTION.
+        Writes the encrypted token to a file. YOU MUST ENCRYPT THE TOKEN BEFORE PASSING IT TO THIS FUNCTION.
         """
         log("[write_token] writing encrypted token")
         if not os.path.isdir(saturnian_appdir):
@@ -413,9 +413,10 @@ def projectsaturnian() -> None:
             newly_encrypted_token = encrypt_token(server_token)
             log(f"newly_encrypted_token: {newly_encrypted_token}", log_level=1)
             write_token(newly_encrypted_token)
+            cached_token = newly_encrypted_token
             log("Token written to file.", log_level=1)
             update_status("Successfully logged in to Draggie Games!")
-            preferred_install_location = messagebox.askquestion("Install Location", "Would you like to install the Saturnian project to the default location?", icon='warning')
+            preferred_install_location = messagebox.askquestion("Choose install location", f"Would you like to install the Saturnian project to the default location ({saturnian_appdir})?\n\nIf you choose no, you will be prompted to select a directory.", icon='info')
             if preferred_install_location == "yes":
                 write_datafile_attribute("install_dir", saturnian_appdir)
             else:
@@ -436,7 +437,8 @@ def projectsaturnian() -> None:
         token = decrypted_token.decode()
         log(f"Final read token: {decrypted_token}", output=True)
     except Exception as e:
-        log(f"[saturnian/errors] Error decrypting token: {e}", log_level=4)
+        # This is typially triggered on first install or if the token file is corrupted.
+        log(f"[saturnian/tokens] Error decrypting token: {e}", log_level=3)
         save_login_error = messagebox.askquestion("Saving your login", "Would you like to install the required files to the default location?", icon='warning')
         if save_login_error == "yes":
             if not os.path.isdir(saturnian_appdir):
@@ -556,7 +558,7 @@ def projectsaturnian() -> None:
     if saturnian_current_version != read_datafile_attribute("current_version"):
         log("[saturnian/Updater] Local game version is different from server version! Input 1 to download and install the new version.")
 
-        choice = messagebox.askquestion("Update available", f"Good news! There is a new version of Saturnian available (version {saturnian_current_version}). This update will be downloaded and installed automatically.\n\nWould you like to update now? (You are currently on version {read_datafile_attribute('current_version')}", icon='info')
+        choice = messagebox.askquestion("Update available", f"Good news! There is a new version of Saturnian available (version {saturnian_current_version}). This update will be downloaded and installed automatically.\n\nWould you like to update now? " + "(You do not have a version of the project instaled on this system!)" if not read_datafile_attribute('current_version') else f"(You currently have version {read_datafile_attribute('current_version')} installed.)", icon='info')
         match choice:
             case "yes":
                 log(f"[saturnian/Updater] Downloading build version {saturnian_current_version}...")
@@ -664,7 +666,7 @@ def projectsaturnian() -> None:
         case "5":
             ask_to_install_auto_updater()
         case "6":
-            sys.exit(0)
+            return sys.exit(1)
         case _:
             log("[saturnian/Updater] Invalid option. Please try again.")
             sleep(1)

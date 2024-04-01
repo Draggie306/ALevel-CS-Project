@@ -81,7 +81,7 @@ public class WaterController : MonoBehaviour
             //StartCoroutine(RiseWaterAtAngle());
             break;
         case 5:
-            // Water freezes
+            // Water freezes (turns to solid)
             //StartCoroutine(FreezeWater());
             break;
         case 6:

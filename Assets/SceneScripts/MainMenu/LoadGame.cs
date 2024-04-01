@@ -16,7 +16,7 @@ public class LoadGame : MonoBehaviour
     public void LoadGameAsync()
     {
         Debug.Log("LoadGameAsync() called");
-        LoginButtonText.text = "Loading...";
+        LoginButtonText.text = "Loading";
         SceneManager.LoadScene("MainScene");
     }
 }

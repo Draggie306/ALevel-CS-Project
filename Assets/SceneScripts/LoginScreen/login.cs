@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
@@ -175,7 +174,7 @@ public class login : MonoBehaviour
             string jsonString = JsonConvert.SerializeObject(loginAccount); // JsonConvert.SerializeObject converts the object to a JSON string, which is what the server expects
             updateInformationMessage("Logging in to Draggie Games account...");
 
-            using (HttpClient client = new HttpClient())
+            using (HttpClient client = new())
             // TODO: Use UnityWebRequest instead of HttpClient because it's probably better
             {
                 var response = await client.PostAsync($"{serverBaseDirectoryUrl}/login", 
@@ -184,6 +183,7 @@ public class login : MonoBehaviour
                 var responseString = await response.Content.ReadAsStringAsync();
                 var responseStatusCode = response.StatusCode;
 
+                
                 if (responseStatusCode != HttpStatusCode.OK)
                 {
                     try
@@ -229,76 +229,87 @@ public class login : MonoBehaviour
                 async void checkEntitlements() 
                 {
                     string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(secureTokenRequest);
-                    using (HttpClient client = new HttpClient())
+                    using HttpClient client = new();
+
+                    // use Headers for Servers Version 0.8.6 and above
+                    // Nicked from https://stackoverflow.com/questions/29801195/adding-headers-when-using-httpclient-getasync
+                    const string ValidationPath = "/api/v1/saturnian/game/gameData/licenses/validation";
+                    client.DefaultRequestHeaders.Add("Authorisation", $"{accessToken}"); // TODO: Maybe change to American spelling for proper standardiZation of RESTful API
+                    client.DefaultRequestHeaders.Add("User-Agent", "unity/draggiegames-compsciproject");
+
+                    var response = await client.GetAsync($"{serverBaseDirectoryUrl}{ValidationPath}"); // Must use await in an async function
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    var responseStatusCode = response.StatusCode;
+                    if (responseStatusCode != HttpStatusCode.OK)
                     {
-                        // use Headers for Servers Version 0.8.6 and above
-                        // Nicked from https://stackoverflow.com/questions/29801195/adding-headers-when-using-httpclient-getasync
-                        const string ValidationPath = "/api/v1/saturnian/game/gameData/licenses/validation";
-                        client.DefaultRequestHeaders.Add("Authorisation", $"{accessToken}"); // TODO: Maybe change to American spelling for proper standardiZation of RESTful API
-                        client.DefaultRequestHeaders.Add("User-Agent", "unity/draggiegames-compsciproject");
-
-                        var response = await client.GetAsync($"{serverBaseDirectoryUrl}{ValidationPath}"); // Must use await in an async function
-                        var responseString = await response.Content.ReadAsStringAsync();
-                        var responseStatusCode = response.StatusCode;
-                        if (responseStatusCode != HttpStatusCode.OK) {
-                            try {
-                                dynamic parsedJsonResponse = JObject.Parse(responseString);
-                                ChangeErrorMessage($"An error has occurred.\n[{responseStatusCode}]\n\nDetailed message: {parsedJsonResponse.message}");
-                                updateInformationMessage($"{parsedJsonResponse.message}. Please try again.");
-                            } catch (Exception e) {
-                                ChangeErrorMessage($"The server had a difficulty handling your request! Sorry about that.\n\nRaw error: {e}");
-                                updateInformationMessage($"Technical error. Please try again.");
-                            } // todo: add finally? 
-                            GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().text = "Login";
-                            GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().enabled = true;
-                            return;
+                        try
+                        {
+                            dynamic parsedJsonResponse = JObject.Parse(responseString);
+                            ChangeErrorMessage($"An error has occurred.\n[{responseStatusCode}]\n\nDetailed message: {parsedJsonResponse.message}");
+                            updateInformationMessage($"{parsedJsonResponse.message}. Please try again.");
                         }
-                        // The try catch block above means that only if the server has handled the message one way or another, it is okay to be processed below
-                        updateInformationMessage($"Saving credentials...");
+                        catch (Exception e)
+                        {
+                            ChangeErrorMessage($"The server had a difficulty handling your request! Sorry about that.\n\nRaw error: {e}");
+                            updateInformationMessage($"Technical error. Please try again.");
+                        } // todo: add finally? 
+                        GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().text = "Login";
+                        GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().enabled = true;
+                        return;
+                    }
+                    // The try catch block above means that only if the server has handled the message one way or another, it is okay to be processed below
+                    updateInformationMessage($"Saving credentials...");
 
-                        dynamic parsedResponse = JObject.Parse(responseString);
-                        Debug.Log($"[DEBUG/JSONDUMP] {parsedResponse}");
-                        var entitlements = parsedResponse.type;
+                    dynamic parsedResponse = JObject.Parse(responseString);
+                    Debug.Log($"[DEBUG/JSONDUMP] {parsedResponse}");
+                    var entitlements = parsedResponse.type;
 
-                        // new entitlements: iterate over each entitlement and check if it is valid
-                        // if it is, then allow in
+                    // new entitlements: iterate over each entitlement and check if it is valid
+                    // if it is, then allow in
 
-                        
-                        Debug.Log($"Checking entitlements for saturnian_alpha_tester or saturnian_beta_tester");
-                        bool access = false;
-                        foreach (var entitlement in parsedResponse.entitlements) {
-                            Debug.Log($"[DEBUG/JSONDUMP] Entitlement: {entitlement}");
-                            var EntitlementId = entitlement.Name; // this is the entitlement ID
-                            if (EntitlementId == "saturnian_alpha_tester") {
-                                access = true;
-                            }
-                            if (EntitlementId == "saturnian_beta_tester") {
-                                access = true;
-                            }
+
+                    Debug.Log($"Checking entitlements for saturnian_alpha_tester or saturnian_beta_tester");
+                    bool access = false;
+
+                    // Use new entitlements api vs single old json
+                    foreach (var entitlement in parsedResponse.entitlements)
+                    {
+                        Debug.Log($"[DEBUG/JSONDUMP] Entitlement: {entitlement}");
+                        var EntitlementId = entitlement.Name; // this is the entitlement ID
+                        if (EntitlementId == "saturnian_alpha_tester")
+                        {
+                            access = true;
                         }
-
-                        if (access) {
-                            // allow in
-                            WriteEncryptedAuthToken(accessToken);
-							// writeup: note: had difficultu seeing where there was an issue here. must stringify the token else it can't write to playerprefs.
-                            updateInformationMessage($"Loading game...");
-                            PlayerPrefs.SetString("DraggieGamesEmail", email);
-                            Debug.Log($"[SavePlayerPrefs] Saved email to PlayerPrefs ({email})");
-                            PlayerPrefs.SetString("SaturnianUsername", $"{username}");
-                            Debug.Log($"[SavePlayerPrefs] Saved username to PlayerPrefs ({username})");
-                            PlayerPrefs.SetString("accessToken", $"{accessToken}"); // todo: make this more secure, playerprefs not seciure
-                            Debug.Log($"[SavePlayerPrefs] Saved accessToken to PlayerPrefs ({accessToken})");
-
-                            // SceneManager.LoadScene("MainScene", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
-                            SceneManager.LoadScene("MainMenu", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
-                            
-                            // var LoggedInAS = GameObject.Find("LoggedInAs");
-                            // LoggedInAS.GetComponent<TextMeshProUGUI>().text = $"Logged in as: {username} ({email})";
-                        } else {
-                            ChangeErrorMessage("You do not have access to the alpha test. Please contact the developer for more information.");
-                            updateInformationMessage("You do not have access to the alpha test. Please contact the developer for more information.");
-                            Application.Quit();
+                        if (EntitlementId == "saturnian_beta_tester")
+                        {
+                            access = true;
                         }
+                    }
+
+                    if (access)
+                    {
+                        // allow in
+                        WriteEncryptedAuthToken(accessToken);
+                        // writeup: note: had difficultu seeing where there was an issue here. must stringify the token else it can't write to playerprefs.
+                        updateInformationMessage($"Loading game...");
+                        PlayerPrefs.SetString("DraggieGamesEmail", email);
+                        Debug.Log($"[SavePlayerPrefs] Saved email to PlayerPrefs ({email})");
+                        PlayerPrefs.SetString("SaturnianUsername", $"{username}");
+                        Debug.Log($"[SavePlayerPrefs] Saved username to PlayerPrefs ({username})");
+                        PlayerPrefs.SetString("accessToken", $"{accessToken}"); // todo: make this more secure, playerprefs not seciure
+                        Debug.Log($"[SavePlayerPrefs] Saved accessToken to PlayerPrefs ({accessToken})");
+
+                        // SceneManager.LoadScene("MainScene", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
+                        SceneManager.LoadScene("MainMenu", LoadSceneMode.Single); // this will load the main scene whilst unloading the login scene
+
+                        // var LoggedInAS = GameObject.Find("LoggedInAs");
+                        // LoggedInAS.GetComponent<TextMeshProUGUI>().text = $"Logged in as: {username} ({email})";
+                    }
+                    else
+                    {
+                        ChangeErrorMessage("You do not have access to the alpha test. Please visit the website to redeem your test key.");
+                        updateInformationMessage("You do not have access to the alpha test. Please visit the website to redeem your test key.", "FF0000");
+                        Application.Quit();
                     }
                 }
                 checkEntitlements();
@@ -359,7 +370,5 @@ public class login : MonoBehaviour
             Debug.LogError("PassText GameObject not found");
 			// Most likely only in scenes where there is this specific script loaded but 
         }
-
-
     }
 }

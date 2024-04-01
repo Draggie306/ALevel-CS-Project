@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using System;
 using UnityEngine.Networking;
+using Newtonsoft.Json;
 
 /// <summary>
 /// Work-in-progress script to get account details from the server
@@ -13,10 +14,18 @@ using UnityEngine.Networking;
 
 public class AccountDetails : MonoBehaviour
 {
-    private void SetTextMeshProUGUI(string gameObjectName, string text)
+    public TextMeshProUGUI TextAreaToDisplay;
+    private void SetTextMeshProUGUI(string text)
     {
-        TextMeshProUGUI textMeshProUGUI = GameObject.Find(gameObjectName).GetComponent<TextMeshProUGUI>();
-        textMeshProUGUI.SetText(text);
+        var textMeshProUGUI = TextAreaToDisplay;
+        string existingCOntent = textMeshProUGUI.text;
+        textMeshProUGUI.SetText(existingCOntent + "\n" + text);
+    }
+
+    private void ClearTextMeshProUGUI()
+    {
+        var textMeshProUGUI = TextAreaToDisplay;
+        textMeshProUGUI.SetText("");
     }
 
     public string baseUrl;
@@ -46,19 +55,13 @@ public class AccountDetails : MonoBehaviour
 
     IEnumerator GetAccountDetails()
     {
-        const string ValidationPath = "/api/v1/saturnian/game/gameData/licenses/validation";
-        /*                         
-                        client.DefaultRequestHeaders.Add("Authorisation", $"{accessToken}");
-                        client.DefaultRequestHeaders.Add("User-Agent", "unity/draggiegames-compsciproject");
-                        client.DefaultRequestHeaders.Add("Content-Type", "application/json");
-
-        */
-
+        ClearTextMeshProUGUI();
+        const string ValidationPath = "/api/v1/saturnian/game/accountInfo";
         string token = UnityEngine.PlayerPrefs.GetString("accessToken");
 
         Debug.Log($"Token: {token}");
 
-        UnityWebRequest request = new UnityWebRequest(baseUrl + ValidationPath, "GET");
+        UnityWebRequest request = new(baseUrl + ValidationPath, "GET");
 
         request.SetRequestHeader("Authorisation", token);
         request.SetRequestHeader("User-Agent", "unity/draggiegames-compsciproject");
@@ -76,19 +79,18 @@ public class AccountDetails : MonoBehaviour
         }
         else
         {
-            var response = JsonUtility.FromJson<Response>(request.downloadHandler.text);
+            string StrResponse = request.downloadHandler.text;
+            Debug.Log($"Response: {StrResponse}");
 
-            SetTextMeshProUGUI("UsernameDisplay", response.username);
-            SetTextMeshProUGUI("EmailDisplay", response.email);
-            SetTextMeshProUGUI("VerifiedDisplay", response.verified.ToString());
-            SetTextMeshProUGUI("VerifiedDateDisplay", response.verified_date);
-            SetTextMeshProUGUI("EntitlementsDisplay", response.entitlements);
-            SetTextMeshProUGUI("CurrentTokenExpirationDisplay", response.current_token_expiration);
-            SetTextMeshProUGUI("CodesRedeemedDisplay", response.codes_redeemed);
-            SetTextMeshProUGUI("StatusDisplay", response.status);
-            SetTextMeshProUGUI("VerificationPendingDisplay", response.verification_pending.ToString());
-            SetTextMeshProUGUI("UserLangDisplay", response.user_lang);
-            SetTextMeshProUGUI("LastActivityDisplay", response.last_activity);
+            var dict = JsonConvert.DeserializeObject<Dictionary<string, object>>(StrResponse);
+            Debug.Log($"Dict: {dict}");
+
+            foreach (var item in dict)
+            {
+                string valueStr = JsonConvert.SerializeObject(item.Value);
+                Debug.Log($"Key: {item.Key}, Value: {valueStr}");
+                SetTextMeshProUGUI($"{item.Key}: {valueStr}");
+            }
         }
     }
 

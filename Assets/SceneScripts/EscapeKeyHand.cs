@@ -28,6 +28,8 @@ public class EscapeKeyHandler : MonoBehaviour
             else
             {
                 Debug.Log("[QuitGameOnEscape] Loading main menu.");
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
                 SceneManager.LoadSceneAsync("MainMenu", LoadSceneMode.Single);
             }
         }

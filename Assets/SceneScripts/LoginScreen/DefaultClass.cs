@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// This is a random script that lets you see if the thing is loaded and enveld in the scene
+/// This is a random script that lets you see if the thing is loaded and active
 /// </summary>
 public class DefaultClass : MonoBehaviour
 {
@@ -12,10 +12,4 @@ public class DefaultClass : MonoBehaviour
     {
         Debug.Log("Default script loaded");
     }
-
-    // Update is called once per frame
-    //void Update()
-    //{
-        
-    //}
 }

@@ -1,19 +1,22 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+/// <summary>
+/// Script to play a sound when hovering over an object
+/// </summary>
+
+// References:
 // Scene transition: https://www.youtube.com/watch?v=HBEStd96UzI
 // Keep audio playing between scenes: https://www.youtube.com/watch?v=xswEpNpucZQ
 
-
 public class MusicHoverPreview : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
+    [Header("References")]
     public string hoverText;
     public OnMusicHover hoverInfo;
     public AudioClip hoverSound;
     private AudioSource audioSource;
-
     private bool audioPlaying = false;
-
     private AudioSource[] allAudioSources;
 
     public void StopAllAudio() {

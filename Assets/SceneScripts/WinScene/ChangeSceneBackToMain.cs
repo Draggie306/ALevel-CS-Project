@@ -1,0 +1,1 @@
+using UnityEngine; public class ChangeSceneBackToMain : MonoBehaviour { public void OnButtonIsClickedToChangeSceneBackFromTheCreditsScene() { UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu"); } }

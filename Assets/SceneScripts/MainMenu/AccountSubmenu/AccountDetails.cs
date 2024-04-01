@@ -7,9 +7,7 @@ using UnityEngine.Networking;
 using Newtonsoft.Json;
 
 /// <summary>
-/// Work-in-progress script to get account details from the server
-/// Need to creatre a custom endpoint for this
-/// Very secure hehehe
+/// Gets the account details from the user as determined by the token from the server and diplays them in the submenu.
 /// </summary>
 
 public class AccountDetails : MonoBehaviour
@@ -44,6 +42,7 @@ public class AccountDetails : MonoBehaviour
         {
             TextToChange.SetText("Loading...");
             StartCoroutine(GetAccountDetails());
+            TextToChange.SetText("Refresh details");
         }
         catch (Exception e)
         {

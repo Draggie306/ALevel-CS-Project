@@ -11,7 +11,7 @@ public class OnHoverButtonInfo : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("Initialised OnHoverButtonInfo");
+        Debug.Log($"Initialised OnHoverButtonInfo on {gameObject.name}");
     }
 
     // method to change the text of the InfoContent game object

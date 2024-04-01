@@ -11,7 +11,7 @@ public static class AudioFadeOut {
     public static IEnumerator FadeOut(AudioSource audioSource, float FadeTime) {
         float startVolume = audioSource.volume;
         //FadeTime = 0.1f; // can't seem to fix bug where rapid spam of hover causes audio to break, so just set fade time to 0.1f and hope for the best
-        if (FadeTime <= 0) { FadeTime = 0.1f; } // Prevent divide by zero (or negative)
+        if (FadeTime <= 0) { FadeTime = 0.1f; } // Prevents divide by zero (or negative)
         Debug.Log($"Fading out {audioSource.name} over {FadeTime} seconds");
 
         while (audioSource.volume > 0) {
@@ -29,13 +29,13 @@ public static class AudioFadeIn {
         if (!audioSource.enabled) { audioSource.enabled = true; }
         if (FadeTime <= 0) { FadeTime = 0.1f; } // Prevent divide by zero (or negative)
         Debug.Log($"Fading in {audioSource.name} over {FadeTime} seconds");
-        float targetVolume = 1; // THIS WAS THE ISSEU<  WTF IT WAS targetVolume = audioSource.volume; WHICH MEANT THAT IT WOULD BE SO QUIET WHEN FADE OUT SPAMMED
+        float targetVolume = 1; // THIS WAS THE ISSUE IT WAS targetVolume = audioSource.volume; WHICH MEANT THAT IT WOULD BE SO QUIET WHEN FADE OUT SPAMMED
         audioSource.volume = 0; // reset volume
         audioSource.Play();
 
         while (audioSource.volume < targetVolume) {
             audioSource.volume += targetVolume * Time.deltaTime / FadeTime;
-            yield return null;
+            yield return null; // Fancy way of saying "wait for the next frame"
         }
     }
 }
@@ -43,11 +43,8 @@ public static class AudioFadeIn {
 // Can be used like this:
 
 /*
-
 StartCoroutine (AudioFadeIn.FadeIn (sound_open, 0.1f));
- 
-//or:
- 
+
 public AudioSource Sound1;
  
 IEnumerator fadeSound1 = AudioFadeIn.FadeIn (Sound1, 0.5f);

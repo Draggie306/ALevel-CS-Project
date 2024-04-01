@@ -1,5 +1,3 @@
-// Used: https://support.unity.com/hc/en-us/articles/115000341143-How-do-I-read-and-write-data-from-a-text-file-
-
 using UnityEngine;
 using System.IO;
 using System.Text;
@@ -9,6 +7,13 @@ using System.Net;
 using System.Net.Http;
 using TMPro;
 using UnityEngine.SceneManagement;
+
+/// <summary>
+/// Reads the token file, encrypts it and POSTs it to the login endpoint
+/// TODO: Currently is broken.
+/// </summary>
+
+// Used: https://support.unity.com/hc/en-us/articles/115000341143-How-do-I-read-and-write-data-from-a-text-file-
 
 public class RuntimeText: MonoBehaviour
 {
@@ -78,7 +83,7 @@ public class RuntimeText: MonoBehaviour
         }
     }
 
-    bool initialCheckForFile()
+    bool InitialCheckForFile()
     // Checks if auth file exists, if not, creates it
     {
         string path = Application.persistentDataPath + "/credentials.bin";
@@ -96,7 +101,7 @@ public class RuntimeText: MonoBehaviour
    void Start()
    {
         Debug.Log($"Auto Token Login script loaded on gameObject: {gameObject.name}");
-        var checker = initialCheckForFile();
+        var checker = InitialCheckForFile();
 
         if (checker == false) {
             Debug.Log("[AutoTokenLogin] No file found, skipping auto login");

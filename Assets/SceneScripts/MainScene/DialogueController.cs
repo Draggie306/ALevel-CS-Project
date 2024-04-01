@@ -42,7 +42,7 @@ public class DialogueController : MonoBehaviour
         yield return null;
     }
 
-    private IEnumerator SHowImportantText(string text, AudioClip VOToPlay = null, float DuratioToDisplayText = 5, float DurationToWaitBeforeDisplayingText = 0f)
+    public IEnumerator SHowImportantText(string text, AudioClip VOToPlay = null, float DuratioToDisplayText = 5, float DurationToWaitBeforeDisplayingText = 0f)
     {
         // Wait for the duration before showing the text
         yield return new WaitForSeconds(DurationToWaitBeforeDisplayingText);

@@ -3713,7 +3713,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Build configuration: \tAlpha\nEditor version: \t\t2022.3.22f1 (URP)\n"
+  m_text: "Build configuration: \tEaster Hand-in (Alpha)\nEditor version: \t\t2022.3.22f1\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f58d005b7913e0b429664e70ce20f8f7, type: 2}
   m_sharedMaterial: {fileID: -855005974780529926, guid: f58d005b7913e0b429664e70ce20f8f7, type: 2}
@@ -6166,7 +6166,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Build date: \t\t\t01/04/2024 10:29\nVersion: \t\t\t\tv0.1.7 (23) (cb)"
+  m_text: "Build date: \t\t\t01/04/2024 19:17\nVersion: \t\t\t\tv0.2.0 (26) (k)"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f58d005b7913e0b429664e70ce20f8f7, type: 2}
   m_sharedMaterial: {fileID: -855005974780529926, guid: f58d005b7913e0b429664e70ce20f8f7, type: 2}

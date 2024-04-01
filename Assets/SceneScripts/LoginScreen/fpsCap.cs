@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Only have one per scene
+/// Caps the FPS based on either the default value or the value set in the player prefs.
 /// </summary>
 /// 
 

@@ -1,6 +1,10 @@
 using UnityEngine;
 using TMPro;
 
+/// <summary>
+/// This script sets the password field to be a password field
+/// Took a while to figure out to get this to work correctly
+/// </summary>
 
 // TODO: Probably can just set this in the editor
 public class PasswordFields : MonoBehaviour {

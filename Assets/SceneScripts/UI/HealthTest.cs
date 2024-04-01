@@ -1,8 +1,11 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
+/// <summary>
+/// This would have been a script to handle the health of the palyer. At the moment, they only take damage every 5-10 seconds.
+/// </summary>
+
 
 public class HealthTest : MonoBehaviour
 {
@@ -13,7 +16,15 @@ public class HealthTest : MonoBehaviour
     public void TakeDamage(int damage)
     {
         health -= damage;
-        healthText.text = health.ToString();
+        // healthText.text = health.ToString();
+
+        if (health <= 0)
+        {
+            Debug.Log("Player is dead, haven't implemented this yet.");
+            SceneManager.LoadScene("MainMenu");
+        }
+
+        StartCoroutine(Wait());
     }
 
 
@@ -38,9 +49,12 @@ public class HealthTest : MonoBehaviour
         string completehealthStr = $"HEALTH: {health.ToString()}%";
         healthText.text = completehealthStr;
 
+        /*
+        // Test taking damage with spacebar
         if(Input.GetKeyDown(KeyCode.Space))
         {
             TakeDamage(1);
         }
+        */
     }
 }

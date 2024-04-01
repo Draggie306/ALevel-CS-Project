@@ -4,6 +4,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Handles when the user presses on the settings buttons in the graphics settings (sub)menu.
+/// </summary>
 public class GraphicsSettingsHandler : MonoBehaviour
 {
     [SerializeField]
@@ -39,6 +42,7 @@ public class GraphicsSettingsHandler : MonoBehaviour
         int RayTracingEnabled = PlayerPrefs.GetInt("RayTracingEnabled", 0);
         int PostProcessingLevel = PlayerPrefs.GetInt("PostProcessingLevel", 2);
 
+        // Se the ui elements to display the current settings
         FPSInputField.GetComponent<TMP_InputField>().text = TargetFPS.ToString();
         VSyncEnabledText.GetComponent<TMP_Text>().text = VSyncEnabled == 1 ? "Enabled" : "Disabled"; // Shorthand if statement
         RayTracingEnabledText.GetComponent<TMP_Text>().text = RayTracingEnabled == 1 ? "Enabled" : "Disabled";
@@ -52,6 +56,7 @@ public class GraphicsSettingsHandler : MonoBehaviour
             _ => "High",
         };
 
+        // Extra checks using SystemInfo to see if the system supports ray tracing.
         if (!SystemInfo.supportsRayTracing) {
             foreach (Transform child in RayTracingEnabledButton.transform)
             {
@@ -68,6 +73,7 @@ public class GraphicsSettingsHandler : MonoBehaviour
         ApplyButton.SetActive(true);
     }
 
+    // Method called when button is clicked
     public void OnSettingButtonClicked(GameObject TheButtonClicked)
     {
         if (TheButtonClicked == VSyncEnabledButton)
@@ -99,6 +105,8 @@ public class GraphicsSettingsHandler : MonoBehaviour
             int PostProcessingLevel = PlayerPrefs.GetInt("PostProcessingLevel", 0);
             PostProcessingLevel = (PostProcessingLevel + 1) % 3; // 0, 1, 2, 0, 1, 2, ...
             PlayerPrefs.SetInt("PostProcessingLevel", PostProcessingLevel);
+
+            // Updates the UI button text to show what the current setting is
             PostProcessingEnabledText.GetComponent<TMP_Text>().text = PostProcessingLevel switch
             {
                 0 => "Low",
@@ -110,9 +118,10 @@ public class GraphicsSettingsHandler : MonoBehaviour
         }
     }
 
+    // Final method called when specifically the Save Settings button is clicked
     public void OnSaveButtonClick() // public so it can be selected in the editor, yes, even for methods
     {
-        int TargetFPS = -1;
+        int TargetFPS = -1; // Unlimited - default
         try {
             TargetFPS = int.Parse(FPSInputField.GetComponent<TMP_InputField>().text);
         } catch (System.Exception e)
@@ -123,13 +132,11 @@ public class GraphicsSettingsHandler : MonoBehaviour
         Application.targetFrameRate = TargetFPS;
         Debug.Log($"[SaveGraphicsSettings] Target FPS set to {TargetFPS}");
 
-        if (VSyncEnabledText.GetComponent<TMP_Text>().text == "Enabled")
-        {
-            QualitySettings.vSyncCount = 1;
+        if (VSyncEnabledText.GetComponent<TMP_Text>().text == "Enabled") {
+            QualitySettings.vSyncCount = 1; // Enabled for every frame
         }
-        else
-        {
-            QualitySettings.vSyncCount = 0;
+        else {
+            QualitySettings.vSyncCount = 0; // Disable it, uncap fps.
         }
         PlayerPrefs.SetInt("VSyncEnabled", QualitySettings.vSyncCount);
         Debug.Log($"[SaveGraphicsSettings] VSync set to {QualitySettings.vSyncCount}");

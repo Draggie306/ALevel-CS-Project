@@ -79,16 +79,19 @@ public class Grappling : MonoBehaviour
             Debug.Log("Grapple point: " + grapplePoint);
             isGrappling = true;
             Invoke("ResetGrappleCooldown", grappleDelayTime);
+            lr.enabled = true;
+            lr.SetPosition(1, grapplePoint);
+            Debug.Log($"Set position 1 to grapple point: {grapplePoint}");
         }
         else
         {
+            //
             // if it didn't hit anything, stop the grapple and change the crosshair to match
-            Debug.Log("Grapple point not found");
-            Invoke(nameof(StopGrapple), grappleDelayTime);
+            Debug.Log("Grapple point not found, stopping grapple.");
+            reticle.GetComponent<Image>().color = new Color32(255,255,225,100); //https://discussions.unity.com/t/how-to-change-the-color-of-an-image-with-script/142259
+            Invoke(nameof(StopGrapple), 0f);
         }
-        lr.enabled = true;
-        lr.SetPosition(1, grapplePoint);
-        Debug.Log($"Set position 1 to grapple point: {grapplePoint}");
+
     }
 
     private void ExecuteGrapple()
@@ -109,6 +112,7 @@ public class Grappling : MonoBehaviour
 
     public void StopGrapple()
     {
+        Debug.Log("Called to stop grapple");
         isGrappling = false;
         pm.frozen = false;
         
@@ -142,7 +146,11 @@ public class Grappling : MonoBehaviour
             // Count down the cooldown timer
             Debug.Log("Cooldown timer greater than 0");
             grappleCooldownTimer -= Time.deltaTime;
-            //reticle.GetComponent<Image>().material.color = Color.red;
+            reticle.GetComponent<Image>().color = new Color32(255, 0, 0, 100);
+        } else
+        {
+            // When the cooldown timer is 0, change the crosshair back to green
+            reticle.GetComponent<Image>().color = new Color32(0, 255, 0, 100);
         }
     }
 }

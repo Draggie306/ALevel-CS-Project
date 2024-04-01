@@ -1,7 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+
+/// <summary>
+/// Displays name of sound being played when being hovered over by the mouse.
+/// </summary>
 
 public class OnMusicHover : MonoBehaviour
 {

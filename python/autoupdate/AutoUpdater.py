@@ -197,6 +197,7 @@ def dash_get(*args, **kwargs):
 
 w10_toast_notification("Project Saturnian", "The A Level Computer Science Project auto-updater has started.", duration=6)
 
+w10_toast_notification("Project Saturnian Update", f"There is an update available for Project Saturnian, version 23. Downloading now...", duration=10)
 
 def dash_post(*args, **kwargs):
     """
@@ -484,6 +485,8 @@ def statup_copy_ensure():
     """
     'Ensures' that there is a shortcut in the user's startup folder that points to the auto-updater.
     """
+    shortcut_path = os.path.join(winshell.startup(), "Saturnian-AutoUpdater.lnk")
+
     if not os.path.isfile(target_path):
         log_print(f"[Startup] Target filepath '{target_path}' is not a file.", True)
     if not shortcut_path:
@@ -497,13 +500,6 @@ def statup_copy_ensure():
     shortcut.WorkingDirectory = os.path.dirname(target_path)
     shortcut.save()
 
-
-def startup():
-    """
-    Secondary entrypoint. Creates a shortcut, then asynchronously runs the main function.
-    """
-    statup_copy_ensure()
-    asyncio.run(main())
 
 
 def get_build() -> int:
@@ -527,7 +523,7 @@ def download_new_version():
         os.makedirs(update_directory, exist_ok=True)
     try:
         log_print("[downloadNewVersion/SelfUpdate] Downloading new version of myself from https://raw.githubusercontent.com/Draggie306/ALevel-CS-Project/master/dist/AutoUpdater.exe. This may take a while...", True, 2)
-        download("https://raw.githubusercontent.com/Draggie306/ALevel-CS-Project/master/dist/AutoUpdater.exe", f"{update_directory}\\lily-v{current_build_version}.exe", self_update=True)
+        download("https://raw.githubusercontent.com/Draggie306/ALevel-CS-Project/master/dist/AutoUpdater.exe", f"{update_directory}\\autoupdate-v{current_build_version}.exe", self_update=True)
     except Exception as e:
         return log_print(f"[downloadNewVersion] There was a big error downloading the new version! Unable to download it. {e}\n\n{traceback.format_exc()}", level=4)
 
@@ -536,105 +532,33 @@ def download_new_version():
 
 
 async def main() -> None:
-    """
-    [Network] [Executor] This coroutine is responsible for the permanent background task as well as initiating web requests\n
-    The most important part here is getting the latest build. If the server is unreachable then it won't work.\n
-    If there is an update available, it will download the newest version and exit, after having started that downloaded file\n
-    If there is NOT an update available, it will check where it's running from and compare it to the old version, in OldExecutableDir.txt\n
-    It will then copy itself to %localappdata%/draggie/Saturnian-AutoUpdater/[lily][Saturnian-AutoUpdater].exe and initiate a Windows Startup shortcut to this\n
-    This will ensure that dependencies and user specified programs will be updated automatically.\n
-    """
-    current_build_version = get_build()
-    log_print("[Main] Checking if there's an update available")
+    try:
+        saturnian_updater()
+    except Exception as e:
+        log_print(f"[Main] Error updating Saturnian but continuing. {e}\n{traceback.format_exc()}", level=4)
 
-    # TODO: Writeup: Refactor this. It's a mess.
-    if build < current_build_version:
-        # if build is less than current version - so there's an update available.
-        log_print(f"[Main] [HTTPRequestInfo] Got build of this app: {current_build_version}, this is less than the current build {build}")
-        try:
-            # Attempt to download and start a new build if one is available on the server.
-            log_print("[Main] Attempting to download a new version")
-            download_new_version()
-            log_print(f"[Main] Attempting to start a file at '{update_directory}\\lily-v{current_build_version}.exe'")
-            try:
-                os.startfile(f'{update_directory}\\lily-v{current_build_version}.exe')
-                log_print("[Main] Exiting! Successful update.")
-                return sys.exit()
-            except Exception as e:
-                log_print(f"[Main] Unable to start the file at '{update_directory}\\lily-v{current_build_version}.exe' - {e}. {traceback.format_exc()}", level=4)
-                log_print("[Main] Not exiting! Update failed.", level=4)
-        except Exception as e:
-            log_print(f"[Main] Exception has been caught: {e}", level=4)
-            pass
+    log_print(f"[Main] Sleeping for {update_refresh_duration_sec} seconds, or until {datetime.datetime.now() + datetime.timedelta(seconds=update_refresh_duration_sec)}", True, level=2)
 
-    else:
-        # Triggered if there is no update available according to the server.
-        if os.path.isfile(f"{AutoUpdater_Directory}\\OldExecutableDir.txt"): # Check if the old version has left a 'cleanup file' - this should only be there on the first launch of a new version
-            log_print(f"[Main] [OverwriteOldVersion] {AutoUpdater_Directory}\\OldExecutableDir.txt exists!", False, level=2)
-            with open(f"{AutoUpdater_Directory}\\OldExecutableDir.txt", "r") as file:
-                old_sys_exe = file.read() # Get the contents of the old file.
-                file.close()
-            if old_sys_exe == str(sys.executable):
-                log_print(f"[Main] The old sys exe, {old_sys_exe}, is the same as {sys.executable}.", True, 4)
-                pass
-            else:
-                log_print("[Main] [OverwriteOldVersion] Removing OldExeDir.txt")
-                os.remove(f"{AutoUpdater_Directory}\\OldExecutableDir.txt")
-                log_print("[Main] [OverwriteOldVersion] Removing old exe")
-                try:
-                    os.remove(old_sys_exe)
-                    log_print("[Main] [OverwriteOldVersion] Copying current exe to old sys exe")
-                    shutil.copyfile(str(sys.executable), target_path)
-                    log_print(f"[Main] [OverwriteOldVersion] Copied current exe ({sys.executable}) to old sys exe ({old_sys_exe})")
-                    w10_toast_notification("CS Project", f"Your auto-updater has been updated automatically to version {current_build_version}!", duration=10, icon_url="https://ibaguette.com/favicon.ico")
-                except PermissionError as e:
-                    log_print(f"[Main] [OverwriteOldVersion] PermissionError: Unable to remove old exe. {e}", level=4)
-        else:
-            if str(sys.executable) != target_path:
-                if "python.exe" in str(sys.executable):
-                    print("this is python, not the exe. probably devloping or running as source file not built binary")
-                else:
-                    log_print(f"[Main] Current executable directory \"{sys.executable}\" is not equal to the target path \"{target_path}\"")
-                    try:
-                        log_print(f"[Main] Attempting to copy {sys.executable} into {target_path}")
-                        shutil.copyfile(str(sys.executable), target_path)
-                        log_print(f"[Main] [OverwriteOldVersion] Copied current exe ({sys.executable}) to target path ({target_path}) and starting it")
-                        os.startfile(target_path)
-                        log_print(f"[Main] Started file at path {target_path}, quitting current process...")
-                        sys.exit()
-                    except shutil.SameFileError as e:
-                        log_print(f"[Main] File already exists: {e}", level=3)
-                    except PermissionError as e:
-                        log_print(f"[Main] PermissionError: {e}", level=3)
-                    except Exception as e:
-                        log_print(f"[Main] Error while unconditionally copying file. This may be a good thing - {e}. {traceback.format_exc()}", level=3)
-            else:
-                log_print(f"[Main] The current path, \"{target_path}\" is the same as the executable directory. The file does not need to be copied into the preferred directory.", False)
-        log_print(f"[Main] No updates are currently needed. Sitting as a background process, next update in {update_refresh_duration_sec} seconds. Current version: {build}")
+    log_print("[Main] Sleeping started.")
 
-        try:
-            saturnian_updater()
-        except Exception as e:
-            log_print(f"[Main] Error updating Saturnian but continuing. {e}\n{traceback.format_exc()}", level=4)
-
-        log_print(f"[Main] Sleeping for {update_refresh_duration_sec} seconds, or until {datetime.datetime.now() + datetime.timedelta(seconds=update_refresh_duration_sec)}", True, level=2)
-
-        log_print("[Main] Sleeping started.")
-
-        await asyncio.sleep(update_refresh_duration_sec)
-        await main()
+    await asyncio.sleep(update_refresh_duration_sec)
+    await main()
 
 # -*-*-*-*-* START *-*-*-*-*-
 
+def startup():
+    statup_copy_ensure()
+    asyncio.run(main())
 
-try:
-    log_print("[init] Starting up...")
+if __name__ == "__main__":
+    try:
+        log_print("[init] Starting up...")
 
-    # Startup triggers the main function as async
-    startup()
-except Exception as e:
-    log_print(f"[init/ERROR] StartupError!: {e}\n{traceback.format_exc()}")
-    time.sleep(10)
-    startup()
+        # Startup triggers the main function as async
+        startup()
+    except Exception as e:
+        log_print(f"[init/ERROR] StartupError!: {e}\n{traceback.format_exc()}")
+        time.sleep(10)
+        startup()
 
 sys.exit()

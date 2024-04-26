@@ -78,3 +78,13 @@ crashlytics-build.properties
 
 *.psd
 Unity-Project-Source.zip
+
+# 3D test functionality - this has been taken out of the final handin verison
+/Assets/SceneScripts/3dObjectScene
+/Assets/SceneAssets/RawModels
+/Assets/CreatedModels*
+/Assets/SceneAssets/Display3DScan*
+
+/Assets/Lily*
+/Assets/textured_output*
+/Assets/Material 0.mat*

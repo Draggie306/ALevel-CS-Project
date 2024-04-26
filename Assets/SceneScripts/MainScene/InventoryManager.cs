@@ -20,6 +20,18 @@ public class InventoryManager : MonoBehaviour
     public GameObject CanvasWithDialogueControllerOnIt;
     public static object Instance { get; internal set; }
 
+    /*
+    // Testing the pickup token function with spacebar
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log($"[DEVELOPMENT TESTING] Calling PickupToken() from InventoryManager");
+            PickupToken();
+        }
+    }
+    */
+
     // Start is called before the first frame update
     void Start()
     {
@@ -84,6 +96,7 @@ public class InventoryManager : MonoBehaviour
 
                 if (i == 5)
                 {
+                    Debug.Log("All six tokens collected, breaking out of loop and stopping pickup token");
                     OnAllSixCollected();
                     break;
                 }

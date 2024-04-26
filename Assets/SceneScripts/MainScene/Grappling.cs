@@ -97,15 +97,20 @@ public class Grappling : MonoBehaviour
     private void ExecuteGrapple()
     {
         float distanceFromPoint = Vector3.Distance(transform.position, grapplePoint);
+        Debug.Log($"[FREEZE_DEBUG] Distance from point: {distanceFromPoint}");
         pm.frozen = false;
 
         Vector3 lowestPoint = new Vector3(grapplePoint.x, grapplePoint.y - 1f, grapplePoint.z);
+        Debug.Log($"[FREEZE_DEBUG] Lowest point: {lowestPoint}");
 
         float grapplePointRelativYPos = grapplePoint.y - lowestPoint.y;
         float highestPointOnArc = grapplePointRelativYPos + overshootYAxis;
 
+        Debug.Log($"[FREEZE_DEBUG] Grapple point relative Y position: {grapplePointRelativYPos}, highest point on arc: {highestPointOnArc}");
+
         if (grapplePointRelativYPos < 0) highestPointOnArc = overshootYAxis;
 
+        Debug.Log($"[FREEZE_DEBUG] Jumping to position: {grapplePoint}, {highestPointOnArc}");
         pm.JumpToPosition(grapplePoint, highestPointOnArc);
         Invoke(nameof(StopGrapple), 1f);
     }

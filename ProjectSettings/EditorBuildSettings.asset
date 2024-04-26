@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/SceneAssets/WinScene.unity
     guid: 8d1699a216d4d1d4fa04ec269ace3a6f
+  - enabled: 0
+    path: Assets/SceneAssets/Display3DScan.unity
+    guid: 12d9fa7ac7433404ea717a5a303ed6ff
   m_configObjects:
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: eaa4aecec1f801d44b79f7c8c9d40868, type: 2}
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 6ae1fa37c9d8fde4ebc4442f0531455b, type: 2}

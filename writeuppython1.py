@@ -20,6 +20,8 @@ import hashlib
 import shutil
 import requests
 from tkinter import messagebox, scrolledtext, filedialog, simpledialog
+from tqdm import tqdm
+from math import ceil
 
 print("Modules loaded.")
 
@@ -86,78 +88,9 @@ def tqdm_download(download_url, save_dir, desc: Optional[str] = None, overwrite:
             log(f"File already exists: {save_dir}", 1, False, component="dash")
             return
 
-        # Tkinter progress bar - https://stackoverflow.com/questions/33768577/tkinter-gui-with-progress-bar
-        tki = tk.Tk()
-        progress = Progressbar(tki, orient="horizontal", length=200, mode="determinate")
-
-        def bar():
-            written = 0
-            old_percent = 0
-            with open(save_dir, "wb") as f:
-                for chunk in requests.get(download_url, stream=True).iter_content(chunk_size=block_size):
-                    if chunk:
-                        f.write(chunk)
-                        progress['value'] = int(written / total_size * 100)
-                        if progress['value'] != old_percent:
-                            old_percent = progress['value']
-                            tki.update_idletasks()
-                            log(f"Download in progress - {progress['value']}%", 1, True, component="dash")
-                        tki.update_idletasks()
-                        written = written + len(chunk)
-                        log(f"Downloaded {written} bytes of {total_size} bytes", 1, False, component="dash")
-            tki.destroy()
-        progress.pack()
-        
-        """
-        t = Thread(target=bar)
-        t.start()
-        tki.mainloop()"""
-
-        # todo: this will not update the pbar, add to writeup: future developments
-        bar()
-
-        # old:
-        """
-        ## todo: fix this, what a load of mess
-
-        def bar():
-            written = 0
-            with open(save_dir, "wb") as f:
-                for chunk in requests.get(download_url, stream=True).iter_content(chunk_size=block_size):
-                    if chunk:
-                        f.write(chunk)
-                        written = written + len(chunk)
-                        q.put(written)
-                        log(f"Downloaded {written} bytes of {total_size} bytes", 1, False, component="dash")
-
-        def update_progress(q):
-            while True:
-                written = q.get()
-                progress['value'] = int(written / total_size * 100)
-                tki.update_idletasks()
-                if written >= total_size:
-                    break
-
-        # Tkinter progress bar - https://stackoverflow.com/questions/33768577/tkinter-gui-with-progress-bar
-        tki = tk.Tk()
-        progress = Progressbar(tki, orient="horizontal", length=200, mode="determinate")
-        progress.pack()
-
-        # Queue main thread - https://stackoverflow.com/questions/62462194/tkinter-tcl-asyncdelete-async-handler-deleted-by-the-wrong-thread-how-to-hand
-        q = Queue()
-        t = Thread(target=bar, args=(q,))
-        t.start()
-
-        bar()
-
-        update_progress(q)
-
-        tki.mainloop()"""
-
-        """with open(save_dir, "wb") as f:
+        with open(save_dir, "wb") as f:
             for data in tqdm(response.iter_content(block_size), total=ceil(total_size // block_size), unit="KB", desc=desc):
-                written = written + len(data)
-                f.write(data)"""
+                f.write(data)
         log(f"Downloaded the file! {total_size} bytes. ({download_url})", 1, False, component="dash")
 
     if return_exceptions:
@@ -220,10 +153,6 @@ def log(text, log_level: Optional[int] = 2, output: Optional[bool] = True, event
             print(f"{text}")
         else:
             print(f"{text}")
-        update_status(text)
-
-        # Now, insert the text to the top of the txt area - https://stackoverflow.com/questions/18346206/tkinter-how-to-insert-text-at-the-beginning-of-the-text-box
-        text_area.insert("1.0", f"{text}\n")
 
         if log_level >= 4:
             messagebox.showerror("Error", text)
@@ -557,7 +486,7 @@ def projectsaturnian() -> None:
     if saturnian_current_version != read_datafile_attribute("current_version"):
         log("[saturnian/Updater] Local game version is different from server version! Input 1 to download and install the new version.")
 
-        choice = messagebox.askquestion("Update available", f"Good news! There is a new version of Saturnian available (version {saturnian_current_version}). This update will be downloaded and installed automatically.\n\nWould you like to update now? " + "(You do not have a version of the project instaled on this system!)" if not read_datafile_attribute('current_version') else f"(You currently have version {read_datafile_attribute('current_version')} installed.)", icon='info')
+        choice = input("Good news! A new version of Saturnian is available. Would you like to download it now? (yes/no) ")
         match choice:
             case "yes":
                 log(f"[saturnian/Updater] Downloading build version {saturnian_current_version}...")
@@ -600,12 +529,8 @@ def projectsaturnian() -> None:
     # the index of the list whilst also adding it to the string between square brackets to make it easer for the user
     # then the option is being added next to it
     # and to join them all up with a new line carriage return the join method is being used
-
-    newWin = tk.Tk()  # hack fix to prevent weird error https://stackoverflow.com/questions/53480400/tkinter-askstring-deleted-before-its-visibility-changed
-    newWin.withdraw()
-    to_open = simpledialog.askstring("Manage your installation", prompt, parent=newWin)
-
-    newWin.destroy()
+    
+    to_open = input(prompt + "\n\n>>> ")
 
     # to_open = messagebox.askquestion("Manage your installation", "What would you like to do?", icon='info')
     if not to_open:  # User has close dthe window
@@ -673,18 +598,12 @@ def projectsaturnian() -> None:
     projectsaturnian()
 
 
-def update_status(status):
-    status_label.config(text=status)
-    root.update()
-
-
 def draggieclient():
     """
     Downloads and installs the project autoupdater.
     """
     known_safe_url = "https://lily.draggie.games/lily_trimmed.exe"
     # In Trimmed/GUI mode, we don't need to ask the user for input, just do it!
-    update_status("Checking prerequisites for AutoUpdater...")
     try:
         # This sets the target path to the user's AppData directory for it to be installed to.
         target_path = os.path.expanduser("~\\AppData\\Local\\Draggie\\SaturnianAutoUpdater\\lily.exe")
@@ -706,18 +625,15 @@ def draggieclient():
         os.makedirs(f"{lily_ensure_appdata_dir}\\Logs", exist_ok=True)
         log(f"[ProjectLily] Prerequisite directory made: {lily_ensure_appdata_dir}\\Logs")
 
-    update_status("Downloading AutoUpdater...")
     log(f"Téléchargement de contenu depuis \"{known_safe_url}\" vers {target_path}...", log_level=1)
     try:
         tqdm_download(known_safe_url, target_path, overwrite=True)
         os.startfile(target_path)
         log("Your system now has DraggieClient installed! Running in the background, it will automatically keep all of your files by me up to date! Enjoy.")
-        update_status("AutoUpdater installed successfully!")
     except PermissionError as e:
         log(f"[ProjectLily] {e}\nThe client is likely running! We don't need to install it again.", log_level=3)
     except Exception as e:
         log(f"[ProjectLily] An error occured: {e}: {traceback.format_exc()}", log_level=4)
-        update_status(f"An error occurred - {e}")
     sleep(1)
 
 
@@ -729,34 +645,4 @@ def run_projectsaturnian():
         messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
 
-def start_thread(event):
-    global thread
-    thread = Thread(target=run_projectsaturnian)
-    thread.daemon = True
-    thread.start()
-    root.after(20, check_thread)
-
-
-def check_thread():
-    if thread.is_alive():
-        root.after(20, check_thread)
-
-
-root = tk.Tk()
-root.title("Project Saturnian Launcher")
-status_label = tk.Label(root, text="")
-status_label.pack()
-
-frame = tk.Frame(root)
-frame.pack()
-
-button = tk.Button(frame, text="Run Project Saturnian") # do NOT include command=run_projectsaturnian as this will call the func twice
-button.bind('<Button-1>', start_thread)
-button.pack(side=tk.LEFT)
-
-text_area = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=60, height=8, font=("Calibri", 10))
-text_area.pack()
-text_area.insert("1.0", "Logs will appear above!\n")
-text_area.insert("1.0", f"Installer GUI started, version: {version}, built at: {datetime.fromtimestamp(build_date)}\n")
-
-root.mainloop()
+projectsaturnian()

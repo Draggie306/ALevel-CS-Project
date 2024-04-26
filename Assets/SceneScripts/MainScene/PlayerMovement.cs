@@ -102,9 +102,11 @@ public class PlayerMovement : MonoBehaviour
     private bool activeGrapple;
     public void JumpToPosition(Vector3 targetPosition, float trajectoryHeight)
     {
+        Debug.Log($"[FREEZE_DEBUG-playermovement] Jumping to position: {targetPosition}, {trajectoryHeight}");
         activeGrapple = true;
 
         velocityToSet = CalculateJumpVelocity(transform.position, targetPosition, trajectoryHeight);
+        Debug.Log($"[FREEZE_DEBUG-playermovement] Calculated velocity: {velocityToSet}");
 
         Invoke(nameof(SetVelocity), 0.1f);
 

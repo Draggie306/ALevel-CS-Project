@@ -64,7 +64,7 @@ if os.path.getsize(zipfile_name) > 512000000:
 
     use_sharding = input("Press 1 to shard the build\n\n>>> ")
 else:
-    print(f"filesize is okay: {os.path.getsize(zipfile_name)}bytes")
+    print(f"filesize: {os.path.getsize(zipfile_name)}bytes")
 
 # Shardify the build!
 

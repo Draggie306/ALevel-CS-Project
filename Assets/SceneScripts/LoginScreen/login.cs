@@ -115,15 +115,9 @@ public class login : MonoBehaviour
     }
 
     // Check out the typo below:
-    public async void OnLoginButtonClocked() // called when the login button is clicked
+    public async void LoginEvent() // called when the login button is clicked
     {
-        //Text statusText = GameObject.Find("StatusText").GetComponent<Text>();
-
-        //var errorText = GameObject.Find("ErrorText");
-        //Debug.Log($"line 34: {errorText}");
-
         try {
-			// Todo: use private attributes or ScriptingAPI [SerializeField]
             Debug.Log("Login button clicked!");
 
             GameObject inputField = GameObject.Find("TMP_Password");  // This should be the input parent field and not the child text field.
@@ -331,44 +325,51 @@ public class login : MonoBehaviour
         yield return new WaitForSeconds(seconds);
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         Debug.Log($"Initialised login.cs from GameObject {gameObject.name}");
-        // Password input field from https://forum.unity.com/threads/changing-inputfield-contenttype-via-script-does-not-update-text.935525/
-        var passwordInput = GameObject.Find("PassText");
-        Debug.Log($"[Start] passwordInput: {passwordInput}");
-		// docs: writeup: This is important to show stars in the password (*****) instead of the actual password (security risk)
-		// writeup: End user requested this feature
-        passwordInput.GetComponent<TMP_InputField>().contentType = TMP_InputField.ContentType.Password;
-        Debug.Log($"[Start] changed passwordInput.contentType to password");
-		// todo: codereview: Just a thought, is passwordfield.cs now needed any more? Doesn't it do the same as the above?
-
-        // now we need to passText.textComponent.SetAllDirty();
-
-        var passwordInputField = GameObject.Find("PassText");
-        if (passwordInputField != null) // Just checking... not sure when this won't be True but good practice.
-        {
-            var pInputted = passwordInput.GetComponent<TMP_InputField>();
-            if (pInputted != null && pInputted.textComponent != null)
-            {
-                pInputted.contentType = TMP_InputField.ContentType.Password;
-                pInputted.textComponent.SetAllDirty();
-				
-				// writeup: docs: Note that despite the sheer lack of documentation about SetAllDirty func it marks the graphic as having been changed. 
-				// The Scripting API literally just says: "Mark the Graphic as dirty."
-				// Found this out in https://github.com/Pinkuburu/Unity-Technologies-ui/blob/master/UnityEngine.UI/UI/Core/Graphic.cs. Go to line 251 and it's on line 266
-            }
-            else
-            {
-                Debug.LogError("TMP_InputField or its textComponent is missing on PassText (if it is not in the scene this is ezpected)");
-				// We need the password input field to have a text component to actually get it.
-            }
-        }
-        else
-        {
-            Debug.LogError("PassText GameObject not found");
-			// Most likely only in scenes where there is this specific script loaded but 
-        }
     }
+
+    // Below original start func commented 30/07/2024: Not needed as this function is called by the button
+
+    // Start is called before the first frame update
+    // void Start()
+    // {
+    //     Debug.Log($"Initialised login.cs from GameObject {gameObject.name}");
+    //     // Password input field from https://forum.unity.com/threads/changing-inputfield-contenttype-via-script-does-not-update-text.935525/
+    //     var passwordInput = GameObject.Find("PassText");
+    //     Debug.Log($"[Start] passwordInput: {passwordInput}");
+	// 	// docs: writeup: This is important to show stars in the password (*****) instead of the actual password (security risk)
+	// 	// writeup: End user requested this feature
+    //     passwordInput.GetComponent<TMP_InputField>().contentType = TMP_InputField.ContentType.Password;
+    //     Debug.Log($"[Start] changed passwordInput.contentType to password");
+	// 	// todo: codereview: Just a thought, is passwordfield.cs now needed any more? Doesn't it do the same as the above?
+
+    //     // now we need to passText.textComponent.SetAllDirty();
+
+    //     var passwordInputField = GameObject.Find("PassText");
+    //     if (passwordInputField != null) // Just checking... not sure when this won't be True but good practice.
+    //     {
+    //         var pInputted = passwordInput.GetComponent<TMP_InputField>();
+    //         if (pInputted != null && pInputted.textComponent != null)
+    //         {
+    //             pInputted.contentType = TMP_InputField.ContentType.Password;
+    //             pInputted.textComponent.SetAllDirty();
+				
+	// 			// writeup: docs: Note that despite the sheer lack of documentation about SetAllDirty func it marks the graphic as having been changed. 
+	// 			// The Scripting API literally just says: "Mark the Graphic as dirty."
+	// 			// Found this out in https://github.com/Pinkuburu/Unity-Technologies-ui/blob/master/UnityEngine.UI/UI/Core/Graphic.cs. Go to line 251 and it's on line 266
+    //         }
+    //         else
+    //         {
+    //             Debug.LogError("TMP_InputField or its textComponent is missing on PassText (if it is not in the scene this is ezpected)");
+	// 			// We need the password input field to have a text component to actually get it.
+    //         }
+    //     }
+    //     else
+    //     {
+    //         Debug.LogError("PassText GameObject not found");
+	// 		// Most likely only in scenes where there is this specific script loaded but 
+    //     }
+    // }
 }

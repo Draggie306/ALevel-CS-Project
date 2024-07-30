@@ -52,7 +52,7 @@
         "Temp/": true
     },
     "dotnet.preferCSharpExtension": true,
-    "dotnet.defaultSolution": "CS-Project.sln",
+    "dotnet.defaultSolution": "Saturnian.sln",
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.autoImportCompletions": true
 }

@@ -75,6 +75,7 @@ crashlytics-build.properties
 /Assets/TerrainSampleAssets/*
 /Assets/PBR Ground Materials #2 [Dirt, Grass & Rocky]/*
 /Assets/Conifers [BOTD]*
+/CMS Assets/input/*
 
 *.psd
 Unity-Project-Source.zip
@@ -88,3 +89,5 @@ Unity-Project-Source.zip
 /Assets/Lily*
 /Assets/textured_output*
 /Assets/Material 0.mat*
+CMS Assets/input/models/jake
+CMS Assets/input/models/jake

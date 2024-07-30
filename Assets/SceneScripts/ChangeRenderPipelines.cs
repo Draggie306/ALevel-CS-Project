@@ -10,6 +10,7 @@ public class SwitchRenderPipelineAsset : MonoBehaviour
  
     void Awake()
     {
+        Debug.Log($"[SwitchRenderPipelineAsset] Initialised on asset {gameObject.name}");
         GraphicsSettings.renderPipelineAsset = assetToSwitchTo;
         Debug.Log($"[SwitchRenderPipelineAsset] Render Pipeline Asset switched to {assetToSwitchTo.name}");
     }

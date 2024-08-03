@@ -310,8 +310,8 @@ public class login : MonoBehaviour
             }
         } catch (Exception e) {
 			// writeup: somewhere about textmeshpro in dev of written solutoin
-            GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().text = "Login";
-            GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().enabled = true;
+            // GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().text = "Login";
+            // GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().enabled = true;
             Debug.LogError($"An error has occurred: {e}");
             var error_object = GameObject.Find("ErrorText");
             Debug.LogError(error_object);

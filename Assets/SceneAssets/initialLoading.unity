@@ -3599,8 +3599,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294945792
-  m_fontColor: {r: 0, g: 0.6745098, b: 1, a: 1}
+    rgba: 4278190335
+  m_fontColor: {r: 1, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -6398,6 +6398,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1926899299}
   - component: {fileID: 1926899300}
+  - component: {fileID: 1926899301}
   m_Layer: 0
   m_Name: NewLoading
   m_TagString: Untagged
@@ -6429,7 +6430,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1926899298}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cb728a21678828458207f28803ef1cf, type: 3}
   m_Name: 
@@ -6440,6 +6441,28 @@ MonoBehaviour:
   ManifestFile: saturnian-content/manifest.json
   loadingText: {fileID: 1679279819}
   SpinnerIcon: {fileID: 722413590}
+--- !u!114 &1926899301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1926899298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54ab6bf3eb4af8541a4d1e4a0c7a5ece, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverBaseDirectoryUrl: https://client.draggie.games
+  baseTextureUrl: https://assets.draggie.games/saturnian-content/
+  AssetsJsonHostname: https://assets.draggie.games/
+  ManifestFile: saturnian-content/manifest.json
+  CanvasRootForLogin: {fileID: 1981825744}
+  SpinnerIcon: {fileID: 722413590}
+  CentreText: {fileID: 1679279819}
+  LowerLargeText: {fileID: 1299618498}
+  LoginButtonUIParent: {fileID: 1404785653}
+  LoginButton: {fileID: 1404785653}
 --- !u!1 &1959753611
 GameObject:
   m_ObjectHideFlags: 0

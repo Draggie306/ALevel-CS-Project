@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
+using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -9,6 +11,13 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+/// <summary>
+/// New login flow at launch of Project Saturnian.
+/// Downloads required assets, logs in, and starts the game if all valid.
+/// </summary>
+
 
 public class NewLoginFlow : MonoBehaviour
 {
@@ -30,6 +39,11 @@ public class NewLoginFlow : MonoBehaviour
     private GameObject CentreText = null;
     [SerializeField]
     private GameObject LowerLargeText = null;
+    [SerializeField]
+    private GameObject LoginButtonUIParent = null;
+    [SerializeField]
+    private GameObject LoginButton = null;
+
     private bool HasCliced = false;
 
     private void Start()
@@ -40,13 +54,22 @@ public class NewLoginFlow : MonoBehaviour
 
     private void Update()
     {
+        // Dev setting
+        if (!HasCliced) {
+            StartCoroutine(StartSequence());
+            HasCliced = true;
+        }
+
+        // Production setting
+        /*
         if (Input.anyKey && !HasCliced)
         {
             
             HasCliced = true;
             Debug.Log("Let's go!");
-            StartCoroutine(StartLogin());
+            StartCoroutine(StartSequence());
         }
+        */
     }
 
     public class CMSObject
@@ -61,24 +84,199 @@ public class NewLoginFlow : MonoBehaviour
         CentreText.GetComponent<TextMeshProUGUI>().text = text;
     }
 
-    private void UpdateLegacyInfoText(string text, string color)
+    private void UpdateLegacyInfoText(string text, string color = "00ACFF")
     {
         LowerLargeText.GetComponent<TextMeshProUGUI>().text = text;
         LowerLargeText.GetComponent<TextMeshProUGUI>().color = ColorUtility.TryParseHtmlString($"#{color}", out Color newColor) ? newColor : Color.white;
     }
 
-    private IEnumerator StartLogin()
+    private IEnumerator StartSequence()
     {
-        CentreText.GetComponent<TextMeshProUGUI>().text = "Loading...";
-        LowerLargeText.GetComponent<TextMeshProUGUI>().text = "Please wait";
+        UpdateMainScreenText("Starting sequence...");
+        UpdateLegacyInfoText("Please wait");
         SpinnerIcon.SetActive(true);
 
-        CentreText.GetComponent<TextMeshProUGUI>().text = "Downloading assets...";
+        UpdateMainScreenText("Downloading assets...");
+        UpdateLegacyInfoText("Downloading required assets...");
         yield return StartCoroutine(RunAsync(DownloadRequiredTextures));
+        SpinnerIcon.SetActive(false);
 
+        UpdateMainScreenText("");
+        UpdateLegacyInfoText("");
         yield return new WaitForSeconds(1);
-        UpdateMainScreenText("Assets downloaded. Starting game...");
-        SceneManager.LoadScene("MainMenu"); 
+        // UpdateMainScreenText("Assets downloaded. Starting game...");
+
+        //SceneManager.LoadScene("MainMenu");
+        SpinnerIcon.SetActive(true);
+        UpdateMainScreenText("Logging in...");
+        UpdateLegacyInfoText("Authenticating with Draggie Games servers...");
+
+        // Login sequence
+        bool loginSuccess = false;
+        yield return StartCoroutine(RunAsync(async () => loginSuccess = await NetLogin())); // <- AI generated
+
+        if (loginSuccess)
+        {
+            UpdateMainScreenText("Logged in. Starting game...");
+            UpdateLegacyInfoText("Starting game...");
+            //yield return new WaitForSeconds(1);
+            SceneManager.LoadScene("MainMenu");
+        }
+        else
+        {
+            UpdateMainScreenText("Error logging in.");
+            UpdateLegacyInfoText("Error logging in. Please try again later.", "FF0000");
+        }
+    }
+
+    private bool HasShownPleaseLogin = false;
+
+    private async Task<bool> NetLogin() {
+        // Attempt to detect if the user is already logged in and has a token saved in %appdata%
+        
+        string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Draggie", "Saturnian");
+
+        if (!Directory.Exists(directory))
+        {
+            if (!HasShownPleaseLogin)
+            {
+                UpdateLegacyInfoText("Please log in to continue.", "FF0000");
+                HasShownPleaseLogin = true;
+            }
+            // Directory does not exist; the user has not logged in before via the Launcher.
+            Debug.Log($"[NetLogin] Draggie directory does not exist at {directory}");
+            bool showLoginButtonUi = await ShowLoginButtonUi();
+            if (!showLoginButtonUi) {
+                Debug.LogError("[NetLogin] Error showing login button UI.");
+                return false;
+            } else {
+                Debug.Log("[NetLogin] Showed login button UI, waiting for user input...");
+                initialUsernameJsonDict UserLoginData = await WaitForButtonPress();
+                Debug.Log($"[NetLogin] Data: {UserLoginData}");
+
+                string jsonString = JsonConvert.SerializeObject(UserLoginData); // JsonConvert.SerializeObject converts the object to a JSON string, which is what the server expects
+                UpdateLegacyInfoText("Logging in to Draggie Games account...");
+
+                using HttpClient client = new();
+                var response = await client.PostAsync($"{serverBaseDirectoryUrl}/login", 
+                new StringContent(jsonString, Encoding.UTF8, "application/json"));
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                var responseStatusCode = response.StatusCode;
+
+                if (responseStatusCode == HttpStatusCode.OK)
+                {
+                    Debug.Log($"[NetLogin] Login successful: {responseString}");
+                    UpdateLegacyInfoText("Login successful!", "00ACFF");
+                    LoginButtonUIParent.SetActive(false);
+                    SpinnerIcon.SetActive(true);
+                    UpdateMainScreenText("Finishing up...");
+                    await Task.Delay(1200);
+                    return true;
+                }
+                else
+                {
+                    Debug.LogError($"[NetLogin] Login failed: {responseString}");
+
+                    try {
+                        dynamic parsedJsonResponse = JObject.Parse(responseString);
+                        string errorMessage = parsedJsonResponse.message;
+                        UpdateLegacyInfoText(errorMessage, "FF0000");
+                    } catch (JsonReaderException e) {
+                        Debug.LogError($"[NetLogin] Error parsing JSON: {e.Message}");
+                        UpdateLegacyInfoText("Login failed. Please try again later.", "FF0000");
+                    }
+                    
+                    // Retry by calling this function again after 3 seconds
+                    GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().text = "Log in";
+                    await Task.Delay(3000);
+                    return await NetLogin();
+                }
+            }
+        } else {
+            Debug.Log($"[NetLogin] Draggie directory exists at {directory}");
+        }
+        return true;
+    }
+
+    public async Task<initialUsernameJsonDict> WaitForButtonPress()
+    {
+        var tcs = new TaskCompletionSource<initialUsernameJsonDict>();
+    
+        // Assuming you have a reference to the login button
+        Button loginButton = LoginButton.GetComponent<Button>();
+        loginButton.onClick.AddListener(async () => {
+            Debug.Log("[WaitForButtonPress] Login button clicked.");
+            var result = await HandleButtonPressAsync();
+            if (result != null)
+            {
+                tcs.SetResult(result);
+            }
+            else
+            {
+                Debug.Log("[WaitForButtonPress] Value is still null, retrying...");
+            }
+        });
+    
+        return await tcs.Task;
+    }
+
+    private async Task<initialUsernameJsonDict> HandleButtonPressAsync()
+    {
+        return await OnButtonPress();
+    }
+
+
+    public async Task<initialUsernameJsonDict> OnButtonPress()
+    {
+        Debug.Log("[OnButtonPress] Login button pressed, parsing email and password...");
+        GameObject inputField = GameObject.Find("TMP_Password");  // This should be the input parent field and not the child text field.
+        string email = GameObject.Find("emailText").GetComponent<TextMeshProUGUI>().text;
+
+        //string password = GameObject.Find("PassText").GetComponent<TextMeshProUGUI>().text; // Comment this out when writeup done: this is not good!!
+
+        string password = inputField.GetComponent<TMP_InputField>().text; // https://discussions.unity.com/t/how-to-get-text-from-textmeshpro-input-field/215584
+        // string password = GameObject.Find("PassText").GetComponent<TMP_InputField>().text; 
+        // 0.0.9: changed from InputField to TMP_InputField as the password field was returning "***" instead of the password
+        // the TextMeshProUGUI component is just the visual representation of the text. When the TMP_InputField is set to the "password" mode, the TextMeshProUGUI component will only show ***s!
+        // Taken from: https://forum.unity.com/threads/change-inputfield-input-from-standard-to-password-text-via-script.291897/
+
+        GameObject.Find("LoginText").GetComponent<TextMeshProUGUI>().text = "Logging in...";
+        Debug.Log($"[OnButtonPress] Email: '{email}', Password: '{password}'");
+
+        // Sanitise email and password, remove u200b (zero width space) and trim. for some reason, the input field adds a zero width space to the end of the string
+        email = email.Replace("\u200b", "").Trim();
+        password = password.Replace("\u200b", "").Trim();
+
+        // basic test for no email or password
+        if (email == "" || password == "")
+        {
+            Debug.Log("[OnButtonPress] Email or password is empty.");
+            //ChangeErrorMessage("Please enter an email and password");
+            UpdateLegacyInfoText("Please enter an email and password!", "FF0000");
+            return null;
+        } else {
+            Debug.Log("Email and password seem to have been entered");
+            UpdateLegacyInfoText("Attempting to log in...", "00ACFF");
+        }
+
+        var loginAccount = new initialUsernameJsonDict // Defined in login.cs
+        {
+            email = email,
+            password = password,
+            scope = "unity/draggiegames-compsciproject" // this can also be called the user agent
+        };
+        return loginAccount;
+    }
+
+    private async Task<bool> ShowLoginButtonUi()
+    {
+        Debug.Log("[ShowLoginButtonUi] Showing login button UI.");
+        LoginButtonUIParent.SetActive(true);
+        CentreText.SetActive(false);
+        SpinnerIcon.SetActive(false);
+
+        return true;
     }
 
 

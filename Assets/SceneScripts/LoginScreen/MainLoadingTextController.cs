@@ -5,12 +5,8 @@ using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine.Networking;
-using System.Runtime.Serialization;
-using System.Collections.Generic;
 using TMPro;
-using UnityEngine.PlayerLoop;
 using System.Threading.Tasks;
-using UnityEditor.PackageManager;
 
 
 public class MainLoadingTextController : MonoBehaviour

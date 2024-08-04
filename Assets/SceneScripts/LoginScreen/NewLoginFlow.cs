@@ -287,9 +287,16 @@ public class NewLoginFlow : MonoBehaviour
                     if (isAlphaTester || isBetaTester)
                     {
                         Debug.Log($"[NetLogin] User is alpha tester: {isAlphaTester}, beta tester: {isBetaTester}");
-                        UpdateMainScreenText($"Welcome back, {parsedValidationResponse.username}! {TesterMsg}");
-                        UpdateLegacyInfoText("Login successful!", "00ACFF");
-                        await Task.Delay(2600);
+                        UpdateLegacyInfoText($"Welcome back, {parsedValidationResponse.username}! {TesterMsg}");
+                        UpdateMainScreenText("Processing credentials...");
+                        await Task.Delay(634);
+                        UpdateMainScreenText("Downloading keychain...");
+                        await Task.Delay(123);
+                        UpdateMainScreenText("Caching assets...");
+                        await Task.Delay(1122);
+                        UpdateMainScreenText("Initialising game...");
+                        await Task.Delay(600);
+                        UpdateMainScreenText("Cleaning up...");
                         return true;
                     }
                     else
@@ -341,8 +348,15 @@ public class NewLoginFlow : MonoBehaviour
                     UpdateLegacyInfoText("Login successful!", "00ACFF");
                     LoginButtonUIParent.SetActive(false);
                     SpinnerIcon.SetActive(true);
-                    UpdateMainScreenText("Finishing up...");
-                    await Task.Delay(1200);
+                    UpdateMainScreenText("Processing credentials...");
+                    await Task.Delay(634);
+                    UpdateMainScreenText("Downloading keychain...");
+                    await Task.Delay(123);
+                    UpdateMainScreenText("Caching assets...");
+                    await Task.Delay(1122);
+                    UpdateMainScreenText("Initialising game...");
+                    await Task.Delay(600);
+                    UpdateMainScreenText("Cleaning up...");
                     return true;
                 }
                 else

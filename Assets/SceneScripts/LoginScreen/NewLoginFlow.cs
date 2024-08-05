@@ -70,13 +70,14 @@ public class NewLoginFlow : MonoBehaviour
         }
 
         // Dev setting (fast)
-        if (!HasCliced) {
-            StartCoroutine(StartSequence());
-            HasCliced = true;
-        }
+
+        // if (!HasCliced) {
+        //     StartCoroutine(StartSequence());
+        //     HasCliced = true;
+        // }
 
         // Production setting
-        /*
+
         if (Input.anyKey && !HasCliced)
         {
             
@@ -84,13 +85,12 @@ public class NewLoginFlow : MonoBehaviour
             Debug.Log("Let's go!");
             StartCoroutine(StartSequence());
         }
-        */
     }
 
     public class CMSObject
     {
         public string Name { get; set; } // To fetch the download URL.
-        public string Cacheable { get; set; }
+        public string Cacheable { get; set; } // Todo: Make it bool
         public string DisplayName { get; set; }
     }
 
@@ -289,13 +289,7 @@ public class NewLoginFlow : MonoBehaviour
                         Debug.Log($"[NetLogin] User is alpha tester: {isAlphaTester}, beta tester: {isBetaTester}");
                         UpdateLegacyInfoText($"Welcome back, {parsedValidationResponse.username}! {TesterMsg}");
                         UpdateMainScreenText("Processing credentials...");
-                        await Task.Delay(634);
-                        UpdateMainScreenText("Downloading keychain...");
-                        await Task.Delay(123);
-                        UpdateMainScreenText("Caching assets...");
-                        await Task.Delay(1122);
-                        UpdateMainScreenText("Initialising game...");
-                        await Task.Delay(600);
+                        //await Task.Delay(634);
                         UpdateMainScreenText("Cleaning up...");
                         return true;
                     }
@@ -555,7 +549,6 @@ public class NewLoginFlow : MonoBehaviour
         return await OnButtonPress();
     }
 
-
     public async Task<initialUsernameJsonDict> OnButtonPress()
     {
         Debug.Log("[OnButtonPress] Login button pressed, parsing email and password...");
@@ -609,8 +602,6 @@ public class NewLoginFlow : MonoBehaviour
 
         return true;
     }
-
-
 
 
     // texture download.
@@ -700,11 +691,13 @@ public class NewLoginFlow : MonoBehaviour
                 DisplayName = Asset.displayName
             };
 
-            CentreText.GetComponent<TMPro.TextMeshProUGUI>().text = $"Downloading {obj.DisplayName} ({NumFilesIterated + 1}/{parsedJsonResponse.num_items})";
+            //CentreText.GetComponent<TMPro.TextMeshProUGUI>().text = $"Downloading {obj.DisplayName} ({NumFilesIterated + 1}/{parsedJsonResponse.num_items})";
 
             Debug.Log($"Passing control to the object with name {obj.Name} - url {CMSAssetBaseURL}{obj.Name}");
 
-            bool success = await ProcessCMSObjectAsync(CMSAssetBaseURL, obj);
+            int TotalFiles = parsedJsonResponse.num_items;
+
+            bool success = await ProcessCMSObjectAsync(CMSAssetBaseURL, obj, TotalFiles, NumFilesIterated);
 
             if (!success)
             {
@@ -719,25 +712,32 @@ public class NewLoginFlow : MonoBehaviour
         return true;
     }
 
-    private async Task<bool> ProcessCMSObjectAsync(string DownloadHost, CMSObject obj)
+    private async Task<bool> ProcessCMSObjectAsync(string DownloadHost, CMSObject obj, int TotalFiles = 0, int CurrentFile = 0)
     {
-        Debug.Log($"[MainLoadingTxtCtrl/ProcessCMSObject] Processing {obj.Name}");
+        var watch = new System.Diagnostics.Stopwatch(); 
+        CurrentFile++;
+        Debug.Log($"[MainLoadingTxtCtrl/ProcessCMSObject] Processing {obj.DisplayName}");
+        // UpdateMainScreenText($"Processing {obj.DisplayName}");
         string url = $"{DownloadHost}{obj.Name}";
 
+        watch.Start();
         string CMSPathDir = Application.persistentDataPath + "/CMS/";
         string filePath = $"{CMSPathDir}{obj.Name}";
 
         Debug.Log($"[MainLoadingTxtCtrl/ProcessCMSObject] Checking if file exists at {filePath}");
 
-        if (System.IO.File.Exists(filePath))
+        if (File.Exists(filePath) && obj.Cacheable == "True")
         {
-            Debug.Log($"[MainLoadingTxtCtrl/ProcessCMSObject] File already exists. Not downloading {obj.Name}");
+            Debug.Log($"[MainLoadingTxtCtrl/ProcessCMSObject/dl] Object: {obj.Name} exists? {System.IO.File.Exists(filePath)}. Is cacheable? {obj.Cacheable}. Skipping download.");
             UpdateMainScreenText($"Verified {obj.DisplayName}");
+            watch.Stop();
+            Debug.Log($"[MainLoadingTxtCtrl/ProcessCMSObject] Time taken to process EXISTING {obj.Name}: {watch.ElapsedMilliseconds}ms");
             return true;
         }
         else
         {
-            Debug.Log($"[MainLoadingTxtCtrl/ProcessCMSObject] File does not exist. Starting download for {obj.Name} from {url}");
+            UpdateMainScreenText($"Downloading {obj.DisplayName} ({CurrentFile}/{TotalFiles})");
+            Debug.Log($"[MainLoadingTxtCtrl/ProcessCMSObject/dl] Object: {obj.Name} exists? {System.IO.File.Exists(filePath)}. (cacheable: {obj.Cacheable}). Downloading from {url}");
 
             UnityWebRequest www = UnityWebRequest.Get(url);
             await www.SendWebRequestAsync();
@@ -750,12 +750,10 @@ public class NewLoginFlow : MonoBehaviour
 
             Debug.Log($"[MainLoadingTxtCtrl/ProcessCMSObject] Download for {obj.Name} complete");
 
-            if (obj.Cacheable == "true")
+            Debug.Log($"[MainLoadingTxtCtrl/ProcessCMSObject] Caching object {obj.Name} if cacheable is true ('{obj.Cacheable}')");
+            if (obj.Cacheable == "True")
             {
                 Debug.Log($"[MainLoadingTxtCtrl/ProcessCMSObject] Caching object for {obj.Name}");
-
-                if (!System.IO.Directory.Exists(CMSPathDir))
-                    System.IO.Directory.CreateDirectory(CMSPathDir);
 
                 System.IO.File.WriteAllBytes(filePath, www.downloadHandler.data);
 
@@ -765,7 +763,8 @@ public class NewLoginFlow : MonoBehaviour
             {
                 Debug.Log($"[MainLoadingTxtCtrl/ProcessCMSObject] Not caching object for {obj.Name} but download complete.");
             }
-
+            watch.Stop();
+            Debug.Log($"[MainLoadingTxtCtrl/ProcessCMSObject] Time taken to process NEW {obj.Name}: {watch.ElapsedMilliseconds}ms");
             return true;
         }
     }

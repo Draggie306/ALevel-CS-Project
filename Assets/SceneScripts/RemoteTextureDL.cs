@@ -70,19 +70,7 @@ public class DraggieGamesCDNDownload : MonoBehaviour {
         // this woks:   https://assets.draggie.games/saturnian-content/locker-assets/xstep-small.png
         // this doesnt: https://assets.draggie.games/saturnian-content/locker-assets/timemachine2.png
 
-        Debug.Log($"[RemoteTextureDL] Texture download for {gameObject.name} complete");
-
-        if (CacheMeIfYouCan) {
-            Debug.Log($"[RemoteTextureDL] Caching texture for {gameObject.name}");
-            // Save to disk. 
-            // Firstly, check if there is a "CMS" directory. I saw this for similarly downloaded files for the game Fortnite, with the "CMS" fodler, so I copied it.
-            if (!System.IO.Directory.Exists(Application.persistentDataPath + "/CMS/")) { 
-                System.IO.Directory.CreateDirectory(Application.persistentDataPath + "/CMS/");
-            }
-            string path = Application.persistentDataPath + "/CMS/" + url.Substring(url.LastIndexOf('/') + 1); // <- This is the filename, i.e. after the last slash in the url
-            System.IO.File.WriteAllBytes(path, www.downloadHandler.data);
-            Debug.Log($"[RemoteTextureDL] Texture saved to {path}");
-        }
+        Debug.Log($"[RemoteTextureDL] Texture download for {gameObject.name} complete"); 
 
         if (www.result != UnityWebRequest.Result.Success) {
             Debug.LogError($"[RemoteTextureDL] Error downloading texture from {url}: {www.error}");
@@ -98,6 +86,18 @@ public class DraggieGamesCDNDownload : MonoBehaviour {
             // This took a while to figure out https://forum.unity.com/threads/load-png-into-sprite-then-draw-sprite-onto-screen.433489/
 
             gameObject.GetComponent<UnityEngine.UI.Image>().sprite = Sprite.Create((Texture2D)myTexture, new Rect(0, 0, myTexture.width, myTexture.height), new Vector2(0.5f, 0.5f));
+
+            if (CacheMeIfYouCan) {
+            Debug.Log($"[RemoteTextureDL] Caching texture for {gameObject.name}");
+            // Save to disk. 
+            // Firstly, check if there is a "CMS" directory. I saw this for similarly downloaded files for the game Fortnite, with the "CMS" fodler, so I copied it.
+            if (!System.IO.Directory.Exists(Application.persistentDataPath + "/CMS/")) { 
+                System.IO.Directory.CreateDirectory(Application.persistentDataPath + "/CMS/");
+            }
+            string path = Application.persistentDataPath + "/CMS/" + url.Substring(url.LastIndexOf('/') + 1); // <- This is the filename, i.e. after the last slash in the url
+            System.IO.File.WriteAllBytes(path, www.downloadHandler.data);
+            Debug.Log($"[RemoteTextureDL] Texture saved to {path}");
+        }
         }
         // check if the spinner is acitive. change image type to simple if it is
 

@@ -22,7 +22,7 @@ public class DiscordRPC : MonoBehaviour
     [SerializeField]
     private string ThirdLine = "Playing"; // actually "state" in the SDK
     public string SecondLine = "Inside the main menu";  // really the "Details" in sdk
-    public string largeImage = "https://assets.draggie.games/saturnian-content/Saturnian-1080.png";
+    public string largeImage = "https://assets.draggie.games/saturnian-content/SaturnianSquare.png";
     public string largeText = "Follow @SaturnianGame for more!";
 
     private Discord.Discord discord;

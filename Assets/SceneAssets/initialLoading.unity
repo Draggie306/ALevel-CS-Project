@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.12731749, g: 0.13414757, b: 0.1210787, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -3295,7 +3294,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Build configuration: \tAlpha\nEditor version: \t\t2022.3.22f1\n"
+  m_text: "Build configuration: \tAlpha\nEditor version: \t\t2022.3.37f1\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f58d005b7913e0b429664e70ce20f8f7, type: 2}
   m_sharedMaterial: {fileID: -855005974780529926, guid: f58d005b7913e0b429664e70ce20f8f7, type: 2}
@@ -3873,12 +3872,12 @@ MonoBehaviour:
   m_RequiresColorTexture: 0
   m_Version: 2
   m_TaaSettings:
-    quality: 3
-    frameInfluence: 0.1
-    jitterScale: 1
-    mipBias: 0
-    varianceClampScale: 0.9
-    contrastAdaptiveSharpening: 0
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
 --- !u!1 &1362776452
 GameObject:
   m_ObjectHideFlags: 0
@@ -5467,7 +5466,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: games.draggie.saturnian.init
+  m_text: Cleaning up...
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -6732,7 +6731,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Build date: \t\t\t04/08/2024 21:37\nVersion: \t\t\t\tv0.2.3 (ck)"
+  m_text: "Build date: \t\t\t05/08/2024 20:54\nVersion: \t\t\t\tv0.2.4 (p)"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f58d005b7913e0b429664e70ce20f8f7, type: 2}
   m_sharedMaterial: {fileID: -855005974780529926, guid: f58d005b7913e0b429664e70ce20f8f7, type: 2}

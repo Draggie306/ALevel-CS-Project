@@ -26,7 +26,7 @@ overwrites = {  # Apply the default settings to all files, however, some may be 
     },
     "Renu.png": {
         "cacheable": False,
-        "displayName": "Renushree (Cute Pic)"
+        "displayName": "Renushree (Cute)"
     },
     "lily": {
         "cacheable": False,

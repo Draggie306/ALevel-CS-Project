@@ -42,7 +42,7 @@ public class DraggieGamesCDNDownload : MonoBehaviour {
         }
     }
  
-    IEnumerator GetTexture() {
+    public IEnumerator GetTexture() {
         Debug.Log($"[RemoteTextureDL] Starting download for {gameObject.name}");
         var initialStartTime = Time.time;
         // lots of networking stuff from https://docs.unity3d.com/Manual/UnityWebRequest.html

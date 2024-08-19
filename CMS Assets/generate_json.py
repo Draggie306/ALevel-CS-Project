@@ -40,6 +40,7 @@ def generate_json():
     items = 0
     for file in os.listdir(f"{path}\\input"):
 
+        # todo: add support for dris and the files within them
         if os.path.isdir(f"{path}\\input\\{file}"):
             print(f"\n\n[INFO] Skipping directory {file}")
             continue

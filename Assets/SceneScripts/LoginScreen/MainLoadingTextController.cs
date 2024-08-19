@@ -193,7 +193,7 @@ public class MainLoadingTextController : MonoBehaviour
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[MainLoadingTxtCtrl/DownloadRequiredTextures] Error: {e.Message}");
+                Debug.LogError($"[MainLoadingTxtCtrl/DownloadRequiredTextures] Error: {e.Message} for item {e.Source}\n\n{e.StackTrace}");
                 return false;
             }
         }

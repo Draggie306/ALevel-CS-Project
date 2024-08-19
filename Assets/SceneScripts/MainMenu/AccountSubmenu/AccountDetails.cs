@@ -5,6 +5,8 @@ using TMPro;
 using System;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
+using UnityEngine.UI;
+using UnityEngine.Assertions.Must;
 
 /// <summary>
 /// Gets the account details from the user as determined by the token from the server and diplays them in the submenu.
@@ -13,6 +15,14 @@ using Newtonsoft.Json;
 public class AccountDetails : MonoBehaviour
 {
     public TextMeshProUGUI TextAreaToDisplay;
+    public string baseUrl;
+    [SerializeField]
+    private GameObject ParentTextToChange;
+    [SerializeField]
+    private GameObject ErrorText;
+    [SerializeField]
+    private GameObject LoadingSpinner;
+
     private void SetTextMeshProUGUI(string text)
     {
         var textMeshProUGUI = TextAreaToDisplay;
@@ -26,8 +36,6 @@ public class AccountDetails : MonoBehaviour
         textMeshProUGUI.SetText("");
     }
 
-    public string baseUrl;
-
     void Start()
     {
         Debug.Log($"Initialised AccountDetails.cs on gameObject: {gameObject.name}");
@@ -35,9 +43,10 @@ public class AccountDetails : MonoBehaviour
 
     public void OnGetDetailsButtonClicked()
     {
-        var ErrorText = GameObject.Find("ErrorText").GetComponent<TextMeshProUGUI>();
-        Debug.Log("Get Details button clicked");
         var TextToChange = GameObject.Find("GetDetailsButtonText").GetComponent<TextMeshProUGUI>();
+        var ErrorText = GameObject.Find("ErrorText").GetComponent<TextMeshProUGUI>();
+        Debug.Log("[OnGetDetailsButtonClicked] Get Details button clicked");
+        LoadingSpinner.SetActive(true);
         try
         {
             TextToChange.SetText("Loading...");
@@ -48,12 +57,14 @@ public class AccountDetails : MonoBehaviour
         {
             Debug.Log(e);
             ErrorText.SetText("Error: " + e);
-            TextToChange.SetText("Update Account Details");
+            TextToChange.SetText("Retry...");
         }
+        LoadingSpinner.SetActive(false);
     }
 
     IEnumerator GetAccountDetails()
     {
+        var ErrorText = GameObject.Find("ErrorText").GetComponent<TextMeshProUGUI>();
         ClearTextMeshProUGUI();
         const string ValidationPath = "/api/v1/saturnian/game/accountInfo";
         string token = UnityEngine.PlayerPrefs.GetString("accessToken");
@@ -73,7 +84,6 @@ public class AccountDetails : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.Log(request.error);
-            var ErrorText = GameObject.Find("ErrorText").GetComponent<TextMeshProUGUI>();
             ErrorText.SetText("Error: " + request.error);
         }
         else

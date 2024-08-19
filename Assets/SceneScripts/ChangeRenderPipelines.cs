@@ -6,10 +6,15 @@ using UnityEngine.Rendering;
 /// </summary>
 public class SwitchRenderPipelineAsset : MonoBehaviour
 {
-    public RenderPipelineAsset assetToSwitchTo;
+    public RenderPipelineAsset assetToSwitchTo = null;
  
     void Awake()
     {
+        if (assetToSwitchTo == null)
+        {
+            Debug.Log($"[SwitchRenderPipelineAsset] not forcibly switching render pipeline asset on as switch is disabled on {gameObject.name}");
+            return;
+        }
         Debug.Log($"[SwitchRenderPipelineAsset] Initialised on asset {gameObject.name}");
         GraphicsSettings.renderPipelineAsset = assetToSwitchTo;
         Debug.Log($"[SwitchRenderPipelineAsset] Render Pipeline Asset switched to {assetToSwitchTo.name}");

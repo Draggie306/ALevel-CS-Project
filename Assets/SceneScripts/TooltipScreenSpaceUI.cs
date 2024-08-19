@@ -25,7 +25,7 @@ public class TooltipScreenSpaceUI : MonoBehaviour
 
         backgoundRectTransform = transform.Find("background").GetComponent<RectTransform>();
         textMeshPro = transform.Find("text").GetComponent<TextMeshProUGUI>(); 
-        Debug.Log("TooltipScreenSpaceUI Awake");
+        Debug.Log($"[TooltipScreenSpaceUI] Awake on object ${gameObject.name}");
 
         rectTransform = transform.GetComponent<RectTransform>();
 
@@ -77,29 +77,32 @@ public class TooltipScreenSpaceUI : MonoBehaviour
     private void ShowTooltip(System.Func<string> getTooltipStringFunc)
     {
         this.getTooltipTextFunc = getTooltipStringFunc;
-        gameObject.SetActive(true);
         SetText(getTooltipStringFunc());
+        gameObject.SetActive(true);
     }
 
     private void HideTooltip()
     {
         // Todo: Fade out animation: https://stackoverflow.com/questions/44933517/fading-in-out-gameobject
         // todo: And check if the mouse is over the tooltip. 
-
+        Debug.Log("[Tooltip/HideTooltip] Triggered.");
         gameObject.SetActive(false);
     }
     public static void ShowTooltip_Static(string tooltipText)
     {
+        Debug.Log("[Tooltip/ShowTooltip_Static/1] Triggered.");
         Instance.SetText(tooltipText);
     }
 
     public static void ShowTooltip_Static(System.Func<string> getTooltipStringFunc)
     {
+        Debug.Log("[Tooltip/ShowTooltip_Static/2] Triggered.");
         Instance.ShowTooltip(getTooltipStringFunc);
     }
 
     public static void HideTooltip_Static()
     {
+        Debug.Log("[Tooltip/HideTooltip_Static] Triggered.");
         Instance.HideTooltip();
     }
 

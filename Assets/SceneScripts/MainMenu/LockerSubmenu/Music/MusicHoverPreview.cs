@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -9,6 +10,8 @@ using UnityEngine.EventSystems;
 // Scene transition: https://www.youtube.com/watch?v=HBEStd96UzI
 // Keep audio playing between scenes: https://www.youtube.com/watch?v=xswEpNpucZQ
 
+
+
 public class MusicHoverPreview : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("References")]
@@ -18,15 +21,24 @@ public class MusicHoverPreview : MonoBehaviour, IPointerEnterHandler, IPointerEx
     private AudioSource audioSource;
     private bool audioPlaying = false;
     private AudioSource[] allAudioSources;
+    public GameObject CanvasRoot;
 
     public void StopAllAudio() {
         allAudioSources = FindObjectsOfType(typeof(AudioSource)) as AudioSource[];
         foreach( AudioSource audioS in allAudioSources) {
+            // Do not stop the audio source on the canvas root (this plays background music)
+            if (audioS.gameObject == CanvasRoot) {
+                Debug.Log($"[StopAllAudio] Skipping audio source {audioS.clip.name} on {audioS.gameObject.name}");
+                CanvasRoot.GetComponent<MusicController>().TriggerPause();
+                continue; 
+                }
+
+            // Else, stop the audio source
             Debug.Log($"[StopAllAudio] Stopping audio source {audioS.clip.name} on {audioS.gameObject.name}");
             audioS.Stop();
         }
     }
-
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -64,6 +76,8 @@ public class MusicHoverPreview : MonoBehaviour, IPointerEnterHandler, IPointerEx
             audioFadeInCoroutine = StartCoroutine(AudioFadeIn.FadeIn(audioSource, 0.7f));
             Debug.Log($"Playing sound {hoverSound.name}");
             audioPlaying = true;
+
+            CanvasRoot.GetComponent<MusicController>().TriggerPause();
         } else
         {
             Debug.LogWarning($"AudioSource or hoverSound was null on {gameObject.name}");
@@ -92,6 +106,13 @@ public class MusicHoverPreview : MonoBehaviour, IPointerEnterHandler, IPointerEx
             audioFadeOutCoroutine = StartCoroutine(AudioFadeOut.FadeOut(audioSource, 0.3f));
             Debug.Log("Stopping sound");
             audioPlaying = false;
+
+            if (CanvasRoot.GetComponent<MusicController>().IsSilenced == true) {
+                Debug.Log($"[OnPointerExit] CanvasRootAudioSourceController is not playing, (re)playing it now");
+                CanvasRoot.GetComponent<MusicController>().TriggerPlay(null); // this will play default.
+            } else {
+                Debug.Log($"[OnPointerExit] CanvasRootAudioSourceController is playing, silenced: {CanvasRoot.GetComponent<MusicController>().IsSilenced}");
+            }
         }
     }
 }

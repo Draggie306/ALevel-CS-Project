@@ -52,7 +52,7 @@ public class NewLoginFlow : MonoBehaviour
     private void Start()
     {
         Debug.Log($"Initialised NewLoginFlow on {gameObject.name}");
-        UpdateMainScreenText("Press any key to start");
+        UpdateMainScreenText("Press any key to start...");
     }
 
     private async void Update()

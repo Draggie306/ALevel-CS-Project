@@ -1069,6 +1069,7 @@ MonoBehaviour:
   hoverText: 
   hoverInfo: {fileID: 0}
   hoverSound: {fileID: 8300000, guid: dbc993cc24fccb3419136815852c0ea3, type: 3}
+  CanvasRoot: {fileID: 0}
 --- !u!114 &254172246
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3294,7 +3295,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Build configuration: \tAlpha\nEditor version: \t\t2022.3.37f1\n"
+  m_text: "Build configuration: \tAlpha\nEditor version: \t\t2022.3.42f1\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f58d005b7913e0b429664e70ce20f8f7, type: 2}
   m_sharedMaterial: {fileID: -855005974780529926, guid: f58d005b7913e0b429664e70ce20f8f7, type: 2}
@@ -4346,6 +4347,7 @@ MonoBehaviour:
   hoverText: 
   hoverInfo: {fileID: 0}
   hoverSound: {fileID: 8300000, guid: dbc993cc24fccb3419136815852c0ea3, type: 3}
+  CanvasRoot: {fileID: 0}
 --- !u!114 &1404785657
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6457,6 +6459,7 @@ MonoBehaviour:
   hoverText: 
   hoverInfo: {fileID: 0}
   hoverSound: {fileID: 8300000, guid: dbc993cc24fccb3419136815852c0ea3, type: 3}
+  CanvasRoot: {fileID: 0}
 --- !u!222 &1856821538
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -6731,7 +6734,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Build date: \t\t\t05/08/2024 20:54\nVersion: \t\t\t\tv0.2.4 (p)"
+  m_text: "Build date: \t\t\t19/08/2024 23:06\nVersion: \t\t\t\tv0.2.5 (ac)"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f58d005b7913e0b429664e70ce20f8f7, type: 2}
   m_sharedMaterial: {fileID: -855005974780529926, guid: f58d005b7913e0b429664e70ce20f8f7, type: 2}
